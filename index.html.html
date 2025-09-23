@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Institutional REPE LBO Model | Value-Add Multifamily</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .input-group { display: grid; grid-template-columns: 2fr 1fr; align-items: center; gap: 0.5rem; }
+        .input-group label { font-size: 0.875rem; color: #4b5563; }
+        .input-group input { text-align: right; font-size: 0.875rem; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db; }
+        h3 { font-size: 1.125rem; font-weight: 600; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 1.5rem; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <div class="container mx-auto p-4 lg:p-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold">REPE Underwriting Model</h1>
+            <p class="text-lg text-gray-600 mt-2">Value-Add Multifamily Acquisition & Renovation</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200 h-fit">
+                <h2 class="text-2xl font-bold mb-4">Deal Assumptions</h2>
+                
+                <h3>Acquisition & Property</h3>
+                <div class="space-y-3">
+                    <div class="input-group"><label>Purchase Price</label><input type="number" id="purchasePrice" value="50000000"></div>
+                    <div class="input-group"><label>Closing Costs (% of Price)</label><input type="number" id="closingCosts" value="2.5"></div>
+                    <div class="input-group"><label>Number of Units</label><input type="number" id="units" value="250"></div>
+                    <div class="input-group"><label>Renovation Budget ($/Unit)</label><input type="number" id="renovationPerUnit" value="15000"></div>
+                </div>
+
+                <h3>Financing (Senior Debt)</h3>
+                <div class="space-y-3">
+                    <div class="input-group"><label>Loan-to-Cost (%)</label><input type="number" id="ltc" value="65"></div>
+                    <div class="input-group"><label>Interest Rate (%)</label><input type="number" id="interestRate" value="6.0"></div>
+                    <div class="input-group"><label>Amortization (Years)</label><input type="number" id="amortization" value="30"></div>
+                    <div class="input-group"><label>Interest-Only Period (Months)</label><input type="number" id="ioPeriod" value="24"></div>
+                    <div class="input-group"><label>Financing Fees (% of Loan)</label><input type="number" id="financingFees" value="1.0"></div>
+                </div>
+
+                <h3>Operations & Revenue</h3>
+                <div class="space-y-3">
+                    <div class="input-group"><label>Avg. Starting Rent ($/Month)</label><input type="number" id="startRent" value="1500"></div>
+                    <div class="input-group"><label>Market Rent Growth (%/Yr)</label><input type="number" id="rentGrowth" value="3.0"></div>
+                    <div class="input-group"><label>General Vacancy (%)</label><input type="number" id="vacancy" value="5.0"></div>
+                    <div class="input-group"><label>Credit Loss (% of EGI)</label><input type="number" id="creditLoss" value="1.0"></div>
+                    <div class="input-group"><label>Property Taxes ($/Unit/Yr)</label><input type="number" id="propTaxes" value="2000"></div>
+                    <div class="input-group"><label>Insurance ($/Unit/Yr)</label><input type="number" id="insurance" value="500"></div>
+                    <div class="input-group"><label>Management Fee (% of EGI)</label><input type="number" id="mgmtFee" value="3.5"></div>
+                    <div class="input-group"><label>Repairs & Maint. ($/Unit/Yr)</label><input type="number" id="repairs" value="600"></div>
+                    <div class="input-group"><label>General OpEx Growth (%/Yr)</label><input type="number" id="opexGrowth" value="2.5"></div>
+                    <div class="input-group"><label>Stabilized CapEx ($/Unit/Yr)</label><input type="number" id="stabilizedCapex" value="250"></div>
+                </div>
+
+                <h3>Exit & Partnership</h3>
+                <div class="space-y-3">
+                    <div class="input-group"><label>Hold Period (Years)</label><input type="number" id="holdPeriod" value="5"></div>
+                    <div class="input-group"><label>Exit Cap Rate (%)</label><input type="number" id="exitCap" value="5.25"></div>
+                    <div class="input-group"><label>Cost of Sale (%)</label><input type="number" id="costOfSale" value="1.5"></div>
+                    <div class="input-group"><label>LP Equity Share (%)</label><input type="number" id="lpShare" value="90"></div>
+                    <div class="input-group"><label>Preferred Return (%)</label><input type="number" id="prefReturn" value="8.0"></div>
+                    <div class="input-group"><label>Promote Split (% GP/LP)</label><input type="text" id="promoteSplit" value="20 / 80"></div>
+                </div>
+
+                <button id="calculateBtn" class="mt-8 w-full bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition">Run Underwriting</button>
+            </div>
+
+            <div class="lg:col-span-2 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Returns Summary</h2>
+                        <div class="space-y-4">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500">Project-Level IRR</p>
+                                <p id="summaryIRR" class="text-4xl font-bold text-green-600">20.5%</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500">Project-Level MOIC</p>
+                                <p id="summaryMOIC" class="text-4xl font-bold text-green-600">2.25x</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center mt-4 pt-4 border-t">
+                                <div>
+                                    <p class="text-xs text-gray-500">LP IRR</p>
+                                    <p id="lpIRR" class="text-xl font-semibold">19.8%</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">GP IRR</p>
+                                    <p id="gpIRR" class="text-xl font-semibold">27.1%</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">LP Multiple</p>
+                                    <p id="lpMOIC" class="text-xl font-semibold">2.18x</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">GP Multiple</p>
+                                    <p id="gpMOIC" class="text-xl font-semibold">2.82x</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Capital Stack</h2>
+                        <div class="space-y-2 text-sm">
+                            <h4 class="font-semibold text-gray-600">Sources</h4>
+                            <div class="flex justify-between"><p>Senior Debt</p><p id="sourceDebt" class="font-mono">$36.1M</p></div>
+                            <div class="flex justify-between"><p>Sponsor Equity (GP)</p><p id="sourceGPEquity" class="font-mono">$1.9M</p></div>
+                            <div class="flex justify-between"><p>Investor Equity (LP)</p><p id="sourceLPEquity" class="font-mono">$17.5M</p></div>
+                            <hr class="my-2">
+                            <div class="flex justify-between font-bold"><p>Total Sources</p><p id="sourceTotal" class="font-mono">$55.5M</p></div>
+                        </div>
+                        <div class="space-y-2 text-sm mt-4">
+                            <h4 class="font-semibold text-gray-600">Uses</h4>
+                            <div class="flex justify-between"><p>Purchase Price</p><p id="usePrice" class="font-mono">$50.0M</p></div>
+                            <div class="flex justify-between"><p>Renovation Budget</p><p id="useReno" class="font-mono">$3.8M</p></div>
+                            <div class="flex justify-between"><p>Closing Costs</p><p id="useClosing" class="font-mono">$1.3M</p></div>
+                            <div class="flex justify-between"><p>Financing Fees</p><p id="useFinancing" class="font-mono">$0.4M</p></div>
+                            <hr class="my-2">
+                            <div class="flex justify-between font-bold"><p>Total Uses</p><p id="useTotal" class="font-mono">$55.5M</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h2 class="text-2xl font-bold mb-4">Profit Distribution Waterfall</h2>
+                    <canvas id="waterfallChart"></canvas>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                 <h2 class="text-2xl font-bold mb-4">Annual Pro Forma</h2>
+                 <div class="overflow-x-auto text-xs">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="py-2 px-2 text-left font-semibold">Metric</th>
+                                <th class="py-2 px-2 text-right font-semibold">Yr 1</th>
+                                <th class="py-2 px-2 text-right font-semibold">Yr 2</th>
+                                <th class="py-2 px-2 text-right font-semibold">Yr 3</th>
+                                <th class="py-2 px-2 text-right font-semibold">Yr 4</th>
+                                <th class="py-2 px-2 text-right font-semibold">Yr 5</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proFormaTable" class="divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- UTILITY FUNCTIONS ---
+        const $ = (id) => document.getElementById(id);
+        const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+        const formatMillions = (val) => `$${(val / 1000000).toFixed(1)}M`;
+        const formatPercent = (val) => `${(val * 100).toFixed(1)}%`;
+        const formatMulti = (val) => `${val.toFixed(2)}x`;
+        let waterfallChart;
+
+        // --- IRR SOLVER ---
+        function calculateIRR(cashFlows, guess = 0.1) {
+            const MAX_ITERATIONS = 100;
+            const TOLERANCE = 1e-7;
+            let x0 = guess;
+
+            for (let i = 0; i < MAX_ITERATIONS; i++) {
+                let npv = 0;
+                let dnpv = 0;
+                for (let t = 0; t < cashFlows.length; t++) {
+                    npv += cashFlows[t] / Math.pow(1 + x0, t);
+                    dnpv -= t * cashFlows[t] / Math.pow(1 + x0, t + 1);
+                }
+                const x1 = x0 - npv / dnpv;
+                if (Math.abs(x1 - x0) < TOLERANCE) return x1;
+                x0 = x1;
+            }
+            return x0; // Return best guess
+        }
+
+        // --- MAIN CALCULATION ENGINE ---
+        function calculateModel() {
+            // --- 1. GATHER INPUTS ---
+            const purchasePrice = parseFloat($('purchasePrice').value);
+            const closingCostsPct = parseFloat($('closingCosts').value) / 100;
+            const units = parseInt($('units').value);
+            const renoPerUnit = parseFloat($('renovationPerUnit').value);
+            const ltc = parseFloat($('ltc').value) / 100;
+            const interestRate = parseFloat($('interestRate').value) / 100;
+            const amortization = parseInt($('amortization').value);
+            const ioPeriod = parseInt($('ioPeriod').value);
+            const financingFeesPct = parseFloat($('financingFees').value) / 100;
+            const startRent = parseFloat($('startRent').value);
+            const rentGrowth = parseFloat($('rentGrowth').value) / 100;
+            const vacancy = parseFloat($('vacancy').value) / 100;
+            const creditLoss = parseFloat($('creditLoss').value) / 100;
+            const propTaxes = parseFloat($('propTaxes').value);
+            const insurance = parseFloat($('insurance').value);
+            const mgmtFee = parseFloat($('mgmtFee').value) / 100;
+            const repairs = parseFloat($('repairs').value);
+            const opexGrowth = parseFloat($('opexGrowth').value) / 100;
+            const stabilizedCapex = parseFloat($('stabilizedCapex').value);
+            const holdPeriod = parseInt($('holdPeriod').value);
+            const exitCap = parseFloat($('exitCap').value) / 100;
+            const costOfSalePct = parseFloat($('costOfSale').value) / 100;
+            const lpShare = parseFloat($('lpShare').value) / 100;
+            const gpShare = 1 - lpShare;
+            const prefReturn = parseFloat($('prefReturn').value) / 100;
+            const [gpPromote, lpPromote] = $('promoteSplit').value.split('/').map(s => parseFloat(s.trim()) / 100);
+
+            // --- 2. SOURCES & USES ---
+            const closingCosts = purchasePrice * closingCostsPct;
+            const renovationBudget = units * renoPerUnit;
+            const totalUses = purchasePrice + renovationBudget + closingCosts;
+            const loanAmount = totalUses * ltc;
+            const financingFees = loanAmount * financingFeesPct;
+            const totalProjectCost = totalUses + financingFees;
+            const totalEquity = totalProjectCost - loanAmount;
+            const lpEquity = totalEquity * lpShare;
+            const gpEquity = totalEquity * gpShare;
+
+            // --- 3. BUILD MONTHLY PRO FORMA ---
+            let monthlyData = [];
+            let currentLoanBalance = loanAmount;
+            const monthlyInterestRate = interestRate / 12;
+            const amortizationMonths = amortization * 12;
+            const pmt = loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, amortizationMonths)) / (Math.pow(1 + monthlyInterestRate, amortizationMonths) - 1);
+            
+            for (let month = 1; month <= holdPeriod * 12; month++) {
+                const year = Math.ceil(month / 12);
+                const currentMonthRent = startRent * Math.pow(1 + rentGrowth, year - 1);
+                
+                const pgi = units * currentMonthRent;
+                const vacLoss = pgi * vacancy;
+                const egi = pgi - vacLoss;
+                const creditLossAmt = egi * creditLoss;
+                const collectedRevenue = egi - creditLossAmt;
+
+                const taxes = (propTaxes * units / 12) * Math.pow(1 + opexGrowth, year - 1);
+                const ins = (insurance * units / 12) * Math.pow(1 + opexGrowth, year - 1);
+                const mgmt = collectedRevenue * mgmtFee;
+                const repairMaint = (repairs * units / 12) * Math.pow(1 + opexGrowth, year - 1);
+                const totalOpex = taxes + ins + mgmt + repairMaint;
+
+                const noi = collectedRevenue - totalOpex;
+                const capex = (stabilizedCapex * units / 12);
+                const unleveredCF = noi - capex;
+
+                const interestPayment = currentLoanBalance * monthlyInterestRate;
+                let principalPayment = 0;
+                if (month > ioPeriod) {
+                    principalPayment = pmt - interestPayment;
+                }
+                const debtService = interestPayment + principalPayment;
+                const leveredCF = unleveredCF - debtService;
+                
+                currentLoanBalance -= principalPayment;
+                monthlyData.push({ year, noi, unleveredCF, leveredCF, currentLoanBalance });
+            }
+
+            // --- 4. SUMMARIZE ANNUALLY & CALCULATE METRICS ---
+            let annualData = [];
+            for (let y = 1; y <= holdPeriod; y++) {
+                const yearData = monthlyData.filter(d => d.year === y);
+                const annualNOI = yearData.reduce((sum, d) => sum + d.noi, 0);
+                const annualLeveredCF = yearData.reduce((sum, d) => sum + d.leveredCF, 0);
+                const eoyLoanBalance = yearData[yearData.length - 1].currentLoanBalance;
+                const ltv = eoyLoanBalance / purchasePrice; // Simplified LTV for demo
+                const debtYield = annualNOI / eoyLoanBalance;
+                annualData.push({ year: y, noi: annualNOI, leveredCF: annualLeveredCF, debtYield, ltv });
+            }
+
+            // --- 5. EXIT CALCULATION ---
+            const forwardNOI = annualData[holdPeriod - 1].noi * (1 + rentGrowth);
+            const grossExitValue = forwardNOI / exitCap;
+            const costOfSale = grossExitValue * costOfSalePct;
+            const netExitValue = grossExitValue - costOfSale;
+            const loanRepayment = currentLoanBalance;
+            const netSaleProceeds = netExitValue - loanRepayment;
+
+            // --- 6. PROPERTY-LEVEL RETURNS ---
+            const propertyCashFlows = [-totalEquity, ...annualData.map(d => d.leveredCF)];
+            propertyCashFlows[holdPeriod] += netSaleProceeds;
+            const projectIRR = calculateIRR(propertyCashFlows);
+            const projectMOIC = propertyCashFlows.slice(1).reduce((a, b) => a + b, 0) / totalEquity;
+
+            // --- 7. PARTNERSHIP WATERFALL ---
+            let lpPrefTracker = 0;
+            let lpReturnOfCapital = lpEquity;
+            let gpReturnOfCapital = gpEquity;
+
+            let lpCF = [];
+            let gpCF = [];
+            let totalProfitForDistribution = 0;
+
+            for (let y = 1; y <= holdPeriod; y++) {
+                let cfToDistribute = annualData[y-1].leveredCF;
+                if (y === holdPeriod) cfToDistribute += netSaleProceeds;
+
+                // 1. Return of Capital
+                let lpRocDist = Math.min(cfToDistribute * lpShare, lpReturnOfCapital);
+                lpReturnOfCapital -= lpRocDist;
+                lpCF[y-1] = (lpCF[y-1] || 0) + lpRocDist;
+                
+                let gpRocDist = Math.min(cfToDistribute * gpShare, gpReturnOfCapital);
+                gpReturnOfCapital -= gpRocDist;
+                gpCF[y-1] = (gpCF[y-1] || 0) + gpRocDist;
+
+                cfToDistribute -= (lpRocDist + gpRocDist);
+
+                // 2. Preferred Return
+                lpPrefTracker += lpEquity * prefReturn;
+                let lpPrefDist = Math.min(cfToDistribute, lpPrefTracker);
+                lpPrefTracker -= lpPrefDist;
+                lpCF[y-1] += lpPrefDist;
+                cfToDistribute -= lpPrefDist;
+
+                // 3. Promote Split
+                let lpPromoteDist = cfToDistribute * lpPromote;
+                let gpPromoteDist = cfToDistribute * gpPromote;
+                lpCF[y-1] += lpPromoteDist;
+                gpCF[y-1] += gpPromoteDist;
+                
+                totalProfitForDistribution += (lpPrefDist + lpPromoteDist + gpPromoteDist);
+            }
+            
+            const lpTotalCF = [-lpEquity, ...lpCF];
+            const lpIRR = calculateIRR(lpTotalCF);
+            const lpMOIC = lpTotalCF.slice(1).reduce((a, b) => a + b, 0) / lpEquity;
+            
+            const gpTotalCF = [-gpEquity, ...gpCF];
+            const gpIRR = calculateIRR(gpTotalCF);
+            const gpMOIC = gpTotalCF.slice(1).reduce((a, b) => a + b, 0) / gpEquity;
+
+            // --- 8. UI UPDATES ---
+            // Summary Cards
+            $('summaryIRR').textContent = formatPercent(projectIRR);
+            $('summaryMOIC').textContent = formatMulti(projectMOIC);
+            $('lpIRR').textContent = formatPercent(lpIRR);
+            $('gpIRR').textContent = formatPercent(gpIRR);
+            $('lpMOIC').textContent = formatMulti(lpMOIC);
+            $('gpMOIC').textContent = formatMulti(gpMOIC);
+
+            // Capital Stack
+            $('sourceDebt').textContent = formatMillions(loanAmount);
+            $('sourceGPEquity').textContent = formatMillions(gpEquity);
+            $('sourceLPEquity').textContent = formatMillions(lpEquity);
+            $('sourceTotal').textContent = formatMillions(totalProjectCost);
+            $('usePrice').textContent = formatMillions(purchasePrice);
+            $('useReno').textContent = formatMillions(renovationBudget);
+            $('useClosing').textContent = formatMillions(closingCosts);
+            $('useFinancing').textContent = formatMillions(financingFees);
+            $('useTotal').textContent = formatMillions(totalProjectCost);
+
+            // Pro Forma Table
+            const proFormaRows = [
+                { label: 'NOI', data: annualData.map(d => formatCurrency(d.noi)) },
+                { label: 'Levered CF', data: annualData.map(d => formatCurrency(d.leveredCF)) },
+                { label: 'Debt Yield', data: annualData.map(d => formatPercent(d.debtYield)) },
+                { label: 'LTV', data: annualData.map(d => formatPercent(d.ltv)) }
+            ];
+            $('proFormaTable').innerHTML = proFormaRows.map(row => `
+                <tr>
+                    <td class="py-2 px-2 font-semibold">${row.label}</td>
+                    ${row.data.map(d => `<td class="py-2 px-2 text-right font-mono">${d}</td>`).join('')}
+                </tr>
+            `).join('');
+
+            // Waterfall Chart
+            const profitToLP = lpTotalCF.slice(1).reduce((a, b) => a + b, 0) - lpEquity;
+            const profitToGP = gpTotalCF.slice(1).reduce((a, b) => a + b, 0) - gpEquity;
+            const ctx = $('waterfallChart').getContext('2d');
+            if (waterfallChart) waterfallChart.destroy();
+            waterfallChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['LP (Investors)', 'GP (Sponsor)'],
+                    datasets: [{
+                        label: 'Profit Distribution',
+                        data: [profitToLP, profitToGP],
+                        backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(21, 128, 61, 0.7)'],
+                        borderColor: ['#3B82F6', '#15803D'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { callback: (val) => formatCurrency(val) } } }
+                }
+            });
+        }
+        
+        // --- EVENT LISTENERS ---
+        $('calculateBtn').addEventListener('click', calculateModel);
+        window.addEventListener('load', calculateModel);
+    </script>
+</body>
+</html>
+
