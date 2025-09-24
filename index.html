@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaletch Underwriting Suite v2.6 | Institutional Model</title>
+    <title>Kaletch Underwriting Suite v2.7 | Institutional Model</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,7 @@
         <aside class="w-1/3 bg-white p-6 shadow-lg h-full overflow-y-auto no-print">
             <div class="flex items-center gap-2 mb-2">
                 <svg class="h-7 w-7 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
-                <h1 class="text-2xl font-bold text-gray-900">Kaletch Underwriting Suite <span class="text-base font-medium text-gray-500 align-top">v2.6</span></h1>
+                <h1 class="text-2xl font-bold text-gray-900">Kaletch Underwriting Suite <span class="text-base font-medium text-gray-500 align-top">v2.7</span></h1>
             </div>
             <p class="text-sm text-gray-600 mb-4">Institutional modeler with a modular calculation engine.</p>
 
@@ -254,13 +254,13 @@
 
     <script>
         /**
-         * Kaletch Underwriting Suite v2.6
-         * Final, polished production version.
-         * Key Enhancements:
-         * 1. Preset Confirmation: Added a confirmation dialog to prevent accidental overwrites.
-         * 2. Sanitized CSV Filename: Robustly sanitizes property name for CSV export.
-         * 3. Sourced Benchmarks: UI note now clarifies the source of market IRR data.
-         * 4. Documentation: A comprehensive README.md file is provided alongside this tool.
+         * Kaletch Underwriting Suite v2.7
+         * Final production version with critical bug fixes.
+         * Key Fixes:
+         * 1. Preferred Return: Now calculates simple interest on outstanding capital, not compounded.
+         * 2. GP Catch-up: Corrected profit allocation logic for accurate promote calculation.
+         * 3. Waterfall Validation: Enforces logical tier ordering to prevent errors.
+         * 4. Edge Case Hardening: Improved CSV naming and DSCR display.
          */
         const $ = (id) => document.getElementById(id);
         const formatCurrency = (val, digits = 0) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
@@ -344,8 +344,6 @@
                 
                 const yearOneAnnualPGI = inputs.startRent * inputs.units * 12;
                 const yearOneMonthlyOpex = (yearOneAnnualPGI * inputs.opexRatio) / 12;
-                // NOTE: Key calcs like revenue and debt service are monthly. They are aggregated to annual for the pro forma.
-                // This provides more accuracy than a pure annual model, especially for mid-year events like reno completion.
                 for (let m = 1; m <= holdMonths; m++) {
                     const year = Math.ceil(m / 12);
                     const rentPremium = (m > inputs.renoCompletionMonths) ? (1 + inputs.postRenoRentPremium) : 1;
@@ -380,7 +378,8 @@
                 const finalSplitTier = inputs.waterfallTiers.find(t => t.type === 'split');
                 
                 for (let y = 0; y < inputs.holdPeriod; y++) {
-                    lpPrefAccrued += (lpCapitalRemaining + lpPrefAccrued) * prefRate;
+                    // CRITICAL FIX: Changed from compounding to simple interest on outstanding capital.
+                    lpPrefAccrued += lpCapitalRemaining * prefRate;
 
                     let cashToDistribute = Math.max(0, annualData[y].leveredCF + (y === inputs.holdPeriod - 1 ? netSaleProceeds : 0));
                     let lpDistYear = 0, gpDistYear = 0;
@@ -403,10 +402,11 @@
                             lpDistTier = Math.min(cashToDistribute, lpPrefAccrued);
                             lpPrefAccrued -= lpDistTier;
                         } else if (tier.type === 'catchup' && finalSplitTier) {
+                            // CRITICAL FIX: Corrected GP catch-up logic.
                             const gpFinalPromotePct = (finalSplitTier.gp || 0) / 100;
-                            const totalProfitToLP = Math.max(0, tierResults.reduce((sum, r) => sum + r.lp, 0) - inputs.lpEquity);
-                            const gpTargetProfit = (1 - gpFinalPromotePct > 0) ? (totalProfitToLP / (1 - gpFinalPromotePct)) * gpFinalPromotePct : 0;
-                            const currentGPProfit = Math.max(0, tierResults.reduce((sum, r) => sum + r.gp, 0) - inputs.gpEquity);
+                            const totalProfitToLP = Math.max(0, (tierResults.reduce((sum, r) => sum + r.lp, 0) + lpDistYear) - inputs.lpEquity);
+                            const gpTargetProfit = (gpFinalPromotePct > 0 && (1-gpFinalPromotePct) > 0) ? (totalProfitToLP / (1 - gpFinalPromotePct)) * gpFinalPromotePct : 0;
+                            const currentGPProfit = Math.max(0, (tierResults.reduce((sum, r) => sum + r.gp, 0) + gpDistYear) - inputs.gpEquity);
                             const catchUpNeeded = Math.max(0, gpTargetProfit - currentGPProfit);
                             const gpShare = (tier.gpShare || 100) / 100;
                             const distForCatchup = catchUpNeeded > 0 && gpShare > 0 ? catchUpNeeded / gpShare : 0;
@@ -447,7 +447,12 @@
                 for (const key in raw) {
                      if (!['propertyName', 'propertyType', 'waterfallJson', 'dealPreset'].includes(key)) {
                         raw[key] = parseFloat(raw[key]);
-                        if (isNaN(raw[key])) errors.add(`${key} must be a valid number.`);
+                        if (isNaN(raw[key])) {
+                            errors.add(`${key} must be a valid number.`);
+                        } else if (key !== 'rentGrowth' && key !== 'opexGrowth' && key !== 'terminalGrowthRate') {
+                            // Sanitize non-growth inputs to be non-negative
+                            raw[key] = Math.max(0, raw[key]);
+                        }
                     }
                 }
 
@@ -463,10 +468,26 @@
                         waterfallTiers = JSON.parse(raw.waterfallJson);
                         check('waterfallJson', !Array.isArray(waterfallTiers), 'Waterfall JSON must be an array of tier objects.');
                         if(Array.isArray(waterfallTiers)) {
+                            const validTierTypes = ['pref', 'returnOfCapital', 'catchup', 'split'];
+                            const tierTypes = waterfallTiers.map(t => t.type);
+                            
+                            tierTypes.forEach(t => {
+                                if(!validTierTypes.includes(t)) errors.add(`Invalid tier type: "${t}".`);
+                            });
+
                             const prefTier = waterfallTiers.find(t => t.type === 'pref');
                             if (prefTier && typeof prefTier.rate !== 'number') {
                                  check('waterfallJson', true, 'A "pref" tier must have a numeric "rate" property.');
                             }
+
+                            // CRITICAL FIX: Add tier order validation
+                            const rocIndex = tierTypes.indexOf('returnOfCapital');
+                            const prefIndex = tierTypes.indexOf('pref');
+                            const catchupIndex = tierTypes.indexOf('catchup');
+                            const splitIndex = tierTypes.indexOf('split');
+                            if (catchupIndex > -1 && splitIndex > -1 && catchupIndex > splitIndex) errors.add('Waterfall Error: Catch-up tier must come before the Final Split tier.');
+                            if (catchupIndex > -1 && ( (rocIndex > -1 && rocIndex > catchupIndex) || (prefIndex > -1 && prefIndex > catchupIndex) )) errors.add('Waterfall Error: Catch-up tier must come after Return of Capital and Preferred Return.');
+
                         }
                     } catch(e) {
                         check('waterfallJson', true, 'Waterfall definition is not valid JSON.');
@@ -580,7 +601,8 @@
                 { label: 'CapEx Reserves', data: annualData.map(d => d.capex) },
                 { label: 'Debt Service', data: annualData.map(d => d.debtService) },
                 { label: 'Levered CF', data: annualData.map(d => d.leveredCF), bold: true },
-                { label: 'DSCR', data: annualData.map(d => d.dscr), format: (v) => v.toFixed(2) + 'x' },
+                // CRITICAL FIX: Handle Infinity DSCR display
+                { label: 'DSCR', data: annualData.map(d => d.dscr), format: (v) => isFinite(v) ? v.toFixed(2) + 'x' : 'N/A' },
             ];
 
             if (hasWaterfall) {
@@ -632,7 +654,7 @@
             
             const alerts = new Set();
             annualData.forEach(year => { 
-                if(year.dscr < 1.25) alerts.add(`<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert"><p class="font-bold">DSCR Warning</p><p>Debt Service Coverage Ratio in Year ${year.year} is ${year.dscr.toFixed(2)}x, which is below the typical lender covenant of 1.25x.</p></div>`); 
+                if(isFinite(year.dscr) && year.dscr < 1.25) alerts.add(`<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert"><p class="font-bold">DSCR Warning</p><p>Debt Service Coverage Ratio in Year ${year.year} is ${year.dscr.toFixed(2)}x, which is below the typical lender covenant of 1.25x.</p></div>`); 
                 if (year.leveredCF < 0) alerts.add(`<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert"><p class="font-bold">Negative Cash Flow</p><p>Negative levered cash flow in Year ${year.year} resulted in zero distributions for that period.</p></div>`);
             });
             if (netSaleProceeds < 0) alerts.add(`<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">Underwater Exit</p><p>The projected net sale proceeds are negative. The waterfall assumes no distributions from the sale.</p></div>`)
@@ -693,7 +715,7 @@
                 { label: 'CapEx Reserves', data: annualData.map(d => d.capex), format: (v) => v.toFixed(2) },
                 { label: 'Debt Service', data: annualData.map(d => d.debtService), format: (v) => v.toFixed(2) },
                 { label: 'Levered CF', data: annualData.map(d => d.leveredCF), format: (v) => v.toFixed(2)},
-                { label: 'DSCR', data: annualData.map(d => d.dscr), format: (v) => `${v.toFixed(4)}x` },
+                { label: 'DSCR', data: annualData.map(d => d.dscr), format: (v) => isFinite(v) ? `${v.toFixed(4)}x` : 'N/A' },
             ];
 
             if(tierResults) {
@@ -710,8 +732,8 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            // ENHANCEMENT: Sanitize filename for special characters.
-            const sanitizedFilename = baseInputs.propertyName.replace(/[^a-zA-Z0-9]/g, '_');
+            
+            const sanitizedFilename = (baseInputs.propertyName?.trim().replace(/[^a-zA-Z0-9]/g, '_') || 'unnamed_deal');
             link.setAttribute("download", `${sanitizedFilename}_pro_forma.csv`);
             document.body.appendChild(link);
             link.click();
@@ -719,12 +741,9 @@
         }
 
         function applyPreset(preset) {
-            // ENHANCEMENT: Add confirmation before overwriting custom changes.
-            if ($('dealPreset').value === 'custom' || preset === 'custom') {
-                 // Do nothing if switching to/from custom
-            } else if (confirm("This will overwrite your current inputs with the selected preset. Are you sure?")) {
+            if (preset !== 'custom' && confirm("This will overwrite your current inputs with the selected preset. Are you sure?")) {
                  // Proceed if confirmed
-            } else {
+            } else if (preset !== 'custom') {
                 $('dealPreset').value = 'custom'; // Revert dropdown if cancelled
                 return;
             }
@@ -766,7 +785,7 @@
             });
              $('csvBtn').addEventListener('click', exportToCSV);
              $('dealPreset').addEventListener('change', (e) => applyPreset(e.target.value));
-             // Make inputs revert preset to "custom" on change
+             
              ALL_INPUT_IDS.forEach(id => {
                 if (id !== 'dealPreset') {
                     $(id).addEventListener('input', () => $('dealPreset').value = 'custom');
@@ -793,13 +812,13 @@
 
             window.addEventListener('load', () => {
                  $('waterfallJson').value = DEFAULT_WATERFALL_JSON;
-                 applyPreset('valueAdd');
+                 applyPreset('custom'); // Load defaults without confirmation
                  $('dealPreset').value = "valueAdd";
+                 calculateModel();
             });
         }
         setupEventListeners();
     </script>
 </body>
 </html>
-
 
