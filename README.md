@@ -1,5 +1,5 @@
-Kaletch Underwriting Suite v2.6
-The Kaletch Underwriting Suite v2.6 is a private, institutional-grade real estate private equity (REPE) underwriting tool for modeling value-add, core-plus, and core investment strategies. Built as a single-page web application using HTML, JavaScript, Tailwind CSS, and Chart.js, it offers a robust, user-friendly interface for calculating capital stacks, cash flows, partnership waterfalls, internal rates of return (IRR), equity multiples (MOIC), and CSV exports. Optimized for performance, accuracy, and flexibility, it is designed for authorized institutional investors, asset managers, and developers.
+Kaletech Underwriting Suite v2.6
+The Kaletech Underwriting Suite v2.6 is a private, institutional-grade real estate private equity (REPE) underwriting tool for modeling value-add, core-plus, and core investment strategies. Built as a single-page web application using HTML, JavaScript, Tailwind CSS, and Chart.js, it offers a robust, user-friendly interface for calculating capital stacks, cash flows, partnership waterfalls, internal rates of return (IRR), equity multiples (MOIC), and CSV exports. Optimized for performance, accuracy, and flexibility, it is designed for authorized institutional investors, asset managers, and developers.
 Warning: This is a private project. Unauthorized access, copying, or distribution of the source code or application is strictly prohibited. Contact the developer for access permissions.
 Features
 
