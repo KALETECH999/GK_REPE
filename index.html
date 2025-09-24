@@ -3,29 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Institutional REPE LBO Model | Value-Add Multifamily</title>
+    <title>Keystone Underwriting Platform | Value-Add Multifamily</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .input-group { display: grid; grid-template-columns: 2fr 1fr; align-items: center; gap: 0.5rem; }
-        .input-group label { font-size: 0.875rem; color: #4b5563; }
-        .input-group input { text-align: right; font-size: 0.875rem; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db; }
-        h3 { font-size: 1.125rem; font-weight: 600; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 1.5rem; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom styles for input fields for a cleaner look */
+        .input-group { display: grid; grid-template-columns: 2fr 1fr; align-items: center; gap: 0.75rem; }
+        .input-group label { font-size: 0.875rem; color: #4b5563; font-weight: 500; }
+        .input-group input { 
+            text-align: right; 
+            font-size: 0.875rem; 
+            padding: 0.5rem; 
+            border-radius: 0.375rem; 
+            border: 1px solid #d1d5db;
+            background-color: #f9fafb;
+            transition: all 0.2s ease-in-out;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: #fff;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        /* Section headers */
+        h3 { 
+            font-size: 1rem; 
+            font-weight: 700; 
+            color: #111827;
+            border-bottom: 1px solid #e5e7eb; 
+            padding-bottom: 0.5rem; 
+            margin-bottom: 1rem; 
+            margin-top: 1.5rem; 
+        }
+        /* Print-specific styles for the export function */
+        @media print {
+            body {
+                background-color: #fff !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                display: block !important;
+                width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+             .grid {
+                display: block;
+            }
+            .print-break-after {
+                break-after: page;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
 
     <div class="container mx-auto p-4 lg:p-8">
-        <header class="mb-8">
-            <h1 class="text-4xl font-bold">REPE Underwriting Model</h1>
-            <p class="text-lg text-gray-600 mt-2">Value-Add Multifamily Acquisition & Renovation</p>
+        <!-- Header -->
+        <header class="mb-8 text-center no-print">
+            <div class="flex items-center justify-center gap-3 mb-2">
+                 <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                </svg>
+                <h1 class="text-4xl font-extrabold tracking-tight text-gray-900">Keystone Underwriting Platform</h1>
+            </div>
+            <p class="text-lg text-gray-600">Institutional-grade analysis of a $50M multifamily value-add acquisition.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200 h-fit">
-                <h2 class="text-2xl font-bold mb-4">Deal Assumptions</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Inputs -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200 h-fit no-print">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Deal Assumptions</h2>
                 
                 <h3>Acquisition & Property</h3>
                 <div class="space-y-3">
@@ -46,15 +104,11 @@
 
                 <h3>Operations & Revenue</h3>
                 <div class="space-y-3">
-                    <div class="input-group"><label>Avg. Starting Rent ($/Month)</label><input type="number" id="startRent" value="1500"></div>
+                    <div class="input-group"><label>Avg. Starting Rent ($/Mo)</label><input type="number" id="startRent" value="1500"></div>
                     <div class="input-group"><label>Market Rent Growth (%/Yr)</label><input type="number" id="rentGrowth" value="3.0"></div>
                     <div class="input-group"><label>General Vacancy (%)</label><input type="number" id="vacancy" value="5.0"></div>
-                    <div class="input-group"><label>Credit Loss (% of EGI)</label><input type="number" id="creditLoss" value="1.0"></div>
-                    <div class="input-group"><label>Property Taxes ($/Unit/Yr)</label><input type="number" id="propTaxes" value="2000"></div>
-                    <div class="input-group"><label>Insurance ($/Unit/Yr)</label><input type="number" id="insurance" value="500"></div>
-                    <div class="input-group"><label>Management Fee (% of EGI)</label><input type="number" id="mgmtFee" value="3.5"></div>
-                    <div class="input-group"><label>Repairs & Maint. ($/Unit/Yr)</label><input type="number" id="repairs" value="600"></div>
-                    <div class="input-group"><label>General OpEx Growth (%/Yr)</label><input type="number" id="opexGrowth" value="2.5"></div>
+                    <div class="input-group"><label>Operating Expense Ratio (%)</label><input type="number" id="opexRatio" value="40"></div>
+                    <div class="input-group"><label>OpEx Growth (%/Yr)</label><input type="number" id="opexGrowth" value="2.5"></div>
                     <div class="input-group"><label>Stabilized CapEx ($/Unit/Yr)</label><input type="number" id="stabilizedCapex" value="250"></div>
                 </div>
 
@@ -68,87 +122,112 @@
                     <div class="input-group"><label>Promote Split (% GP/LP)</label><input type="text" id="promoteSplit" value="20 / 80"></div>
                 </div>
 
-                <button id="calculateBtn" class="mt-8 w-full bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition">Run Underwriting</button>
+                <button id="calculateBtn" class="mt-8 w-full bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300">Run Underwriting</button>
+                <button onclick="window.print()" class="mt-4 w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transition duration-300">
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.32 0c.662 0 1.18.568 1.12 1.227l-.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.32 0l-3.232-3.232m-3.232 0l-3.232 3.232M9 6l3 3m0 0l3-3m-3 3v6.75" /></svg>
+                    Export Report
+                </button>
             </div>
 
-            <div class="lg:col-span-2 space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                        <h2 class="text-2xl font-bold mb-4">Returns Summary</h2>
-                        <div class="space-y-4">
-                            <div class="text-center">
-                                <p class="text-sm font-medium text-gray-500">Project-Level IRR</p>
-                                <p id="summaryIRR" class="text-4xl font-bold text-green-600">20.5%</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-sm font-medium text-gray-500">Project-Level MOIC</p>
-                                <p id="summaryMOIC" class="text-4xl font-bold text-green-600">2.25x</p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 text-center mt-4 pt-4 border-t">
-                                <div>
-                                    <p class="text-xs text-gray-500">LP IRR</p>
-                                    <p id="lpIRR" class="text-xl font-semibold">19.8%</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500">GP IRR</p>
-                                    <p id="gpIRR" class="text-xl font-semibold">27.1%</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500">LP Multiple</p>
-                                    <p id="lpMOIC" class="text-xl font-semibold">2.18x</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500">GP Multiple</p>
-                                    <p id="gpMOIC" class="text-xl font-semibold">2.82x</p>
-                                </div>
-                            </div>
+            <!-- Right Column: Outputs -->
+            <div class="lg:col-span-2 space-y-8 print-container">
+                 <!-- Executive Summary Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 print-break-after">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Executive Summary</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Project IRR</p>
+                            <p id="summaryIRR" class="text-4xl font-extrabold text-emerald-600">0.0%</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Equity Multiple</p>
+                            <p id="summaryMOIC" class="text-4xl font-extrabold text-emerald-600">0.00x</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Equity Req.</p>
+                            <p id="summaryEquity" class="text-4xl font-extrabold text-gray-800">$0.0M</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Exit Value</p>
+                            <p id="summaryExit" class="text-4xl font-extrabold text-gray-800">$0.0M</p>
                         </div>
                     </div>
+                    <div class="mt-6 text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
+                        <p id="summaryNarrative">Generating investment summary...</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Capital Stack Card -->
                     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                        <h2 class="text-2xl font-bold mb-4">Capital Stack</h2>
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">Project Capitalization</h2>
                         <div class="space-y-2 text-sm">
                             <h4 class="font-semibold text-gray-600">Sources</h4>
-                            <div class="flex justify-between"><p>Senior Debt</p><p id="sourceDebt" class="font-mono">$36.1M</p></div>
-                            <div class="flex justify-between"><p>Sponsor Equity (GP)</p><p id="sourceGPEquity" class="font-mono">$1.9M</p></div>
-                            <div class="flex justify-between"><p>Investor Equity (LP)</p><p id="sourceLPEquity" class="font-mono">$17.5M</p></div>
+                            <div class="flex justify-between"><p>Senior Debt</p><p id="sourceDebt" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Sponsor Equity (GP)</p><p id="sourceGPEquity" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Investor Equity (LP)</p><p id="sourceLPEquity" class="font-mono">$0.0M</p></div>
                             <hr class="my-2">
-                            <div class="flex justify-between font-bold"><p>Total Sources</p><p id="sourceTotal" class="font-mono">$55.5M</p></div>
+                            <div class="flex justify-between font-bold"><p>Total Sources</p><p id="sourceTotal" class="font-mono">$0.0M</p></div>
                         </div>
                         <div class="space-y-2 text-sm mt-4">
                             <h4 class="font-semibold text-gray-600">Uses</h4>
-                            <div class="flex justify-between"><p>Purchase Price</p><p id="usePrice" class="font-mono">$50.0M</p></div>
-                            <div class="flex justify-between"><p>Renovation Budget</p><p id="useReno" class="font-mono">$3.8M</p></div>
-                            <div class="flex justify-between"><p>Closing Costs</p><p id="useClosing" class="font-mono">$1.3M</p></div>
-                            <div class="flex justify-between"><p>Financing Fees</p><p id="useFinancing" class="font-mono">$0.4M</p></div>
+                            <div class="flex justify-between"><p>Purchase Price</p><p id="usePrice" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Renovation Budget</p><p id="useReno" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Closing Costs</p><p id="useClosing" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Financing Fees</p><p id="useFinancing" class="font-mono">$0.0M</p></div>
                             <hr class="my-2">
-                            <div class="flex justify-between font-bold"><p>Total Uses</p><p id="useTotal" class="font-mono">$55.5M</p></div>
+                            <div class="flex justify-between font-bold"><p>Total Uses</p><p id="useTotal" class="font-mono">$0.0M</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Returns Summary Card -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">Partnership Returns</h2>
+                        <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+                            <div class="text-center p-2 rounded-lg bg-emerald-50">
+                                <p class="text-xs font-bold text-emerald-800">LP IRR</p>
+                                <p id="lpIRR" class="text-2xl font-bold text-emerald-700">0.0%</p>
+                            </div>
+                            <div class="text-center p-2 rounded-lg bg-emerald-50">
+                                <p class="text-xs font-bold text-emerald-800">GP IRR</p>
+                                <p id="gpIRR" class="text-2xl font-bold text-emerald-700">0.0%</p>
+                            </div>
+                             <div class="text-center p-2 rounded-lg bg-gray-100">
+                                <p class="text-xs font-bold text-gray-600">LP Multiple</p>
+                                <p id="lpMOIC" class="text-2xl font-bold text-gray-800">0.00x</p>
+                            </div>
+                            <div class="text-center p-2 rounded-lg bg-gray-100">
+                                <p class="text-xs font-bold text-gray-600">GP Multiple</p>
+                                <p id="gpMOIC" class="text-2xl font-bold text-gray-800">0.00x</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                    <h2 class="text-2xl font-bold mb-4">Profit Distribution Waterfall</h2>
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Annual Pro Forma Cash Flow</h2>
+                    <div class="overflow-x-auto text-xs">
+                        <table class="min-w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-2 px-2 text-left font-semibold">Metric</th>
+                                    <th class="py-2 px-2 text-right font-semibold">Yr 1</th>
+                                    <th class="py-2 px-2 text-right font-semibold">Yr 2</th>
+                                    <th class="py-2 px-2 text-right font-semibold">Yr 3</th>
+                                    <th class="py-2 px-2 text-right font-semibold">Yr 4</th>
+                                    <th class="py-2 px-2 text-right font-semibold">Yr 5</th>
+                                </tr>
+                            </thead>
+                            <tbody id="proFormaTable" class="divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Profit Distribution Waterfall</h2>
                     <canvas id="waterfallChart"></canvas>
                 </div>
-            </div>
-
-            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                 <h2 class="text-2xl font-bold mb-4">Annual Pro Forma</h2>
-                 <div class="overflow-x-auto text-xs">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="py-2 px-2 text-left font-semibold">Metric</th>
-                                <th class="py-2 px-2 text-right font-semibold">Yr 1</th>
-                                <th class="py-2 px-2 text-right font-semibold">Yr 2</th>
-                                <th class="py-2 px-2 text-right font-semibold">Yr 3</th>
-                                <th class="py-2 px-2 text-right font-semibold">Yr 4</th>
-                                <th class="py-2 px-2 text-right font-semibold">Yr 5</th>
-                            </tr>
-                        </thead>
-                        <tbody id="proFormaTable" class="divide-y divide-gray-200">
-                        </tbody>
-                    </table>
-                 </div>
             </div>
         </div>
     </div>
@@ -162,25 +241,39 @@
         const formatMulti = (val) => `${val.toFixed(2)}x`;
         let waterfallChart;
 
-        // --- IRR SOLVER ---
-        function calculateIRR(cashFlows, guess = 0.1) {
-            const MAX_ITERATIONS = 100;
-            const TOLERANCE = 1e-7;
-            let x0 = guess;
-
-            for (let i = 0; i < MAX_ITERATIONS; i++) {
-                let npv = 0;
-                let dnpv = 0;
-                for (let t = 0; t < cashFlows.length; t++) {
-                    npv += cashFlows[t] / Math.pow(1 + x0, t);
-                    dnpv -= t * cashFlows[t] / Math.pow(1 + x0, t + 1);
-                }
-                const x1 = x0 - npv / dnpv;
-                if (Math.abs(x1 - x0) < TOLERANCE) return x1;
-                x0 = x1;
+        // --- IRR SOLVER (Net Present Value) ---
+        function npv(rate, cashFlows) {
+            let npv = 0;
+            for (let i = 0; i < cashFlows.length; i++) {
+                npv += cashFlows[i] / Math.pow(1 + rate, i);
             }
-            return x0; // Return best guess
+            return npv;
         }
+
+        function calculateIRR(cashFlows, guess = 0.1) {
+            const MAX_ITER = 100;
+            const TOLERANCE = 1e-7;
+            let low = -0.99, high = 1.0;
+
+            // Ensure first cash flow is negative
+            if (cashFlows[0] >= 0) { return 0; }
+            
+            let mid = guess;
+            for (let i = 0; i < MAX_ITER; i++) {
+                const npvMid = npv(mid, cashFlows);
+                if (Math.abs(npvMid) < TOLERANCE) {
+                    return mid;
+                }
+                if (npv(low, cashFlows) * npvMid < 0) {
+                    high = mid;
+                } else {
+                    low = mid;
+                }
+                mid = (low + high) / 2;
+            }
+            return mid; // return best guess
+        }
+
 
         // --- MAIN CALCULATION ENGINE ---
         function calculateModel() {
@@ -197,11 +290,7 @@
             const startRent = parseFloat($('startRent').value);
             const rentGrowth = parseFloat($('rentGrowth').value) / 100;
             const vacancy = parseFloat($('vacancy').value) / 100;
-            const creditLoss = parseFloat($('creditLoss').value) / 100;
-            const propTaxes = parseFloat($('propTaxes').value);
-            const insurance = parseFloat($('insurance').value);
-            const mgmtFee = parseFloat($('mgmtFee').value) / 100;
-            const repairs = parseFloat($('repairs').value);
+            const opexRatio = parseFloat($('opexRatio').value) / 100;
             const opexGrowth = parseFloat($('opexGrowth').value) / 100;
             const stabilizedCapex = parseFloat($('stabilizedCapex').value);
             const holdPeriod = parseInt($('holdPeriod').value);
@@ -228,7 +317,7 @@
             let currentLoanBalance = loanAmount;
             const monthlyInterestRate = interestRate / 12;
             const amortizationMonths = amortization * 12;
-            const pmt = loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, amortizationMonths)) / (Math.pow(1 + monthlyInterestRate, amortizationMonths) - 1);
+            const pmt = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -amortizationMonths));
             
             for (let month = 1; month <= holdPeriod * 12; month++) {
                 const year = Math.ceil(month / 12);
@@ -237,16 +326,10 @@
                 const pgi = units * currentMonthRent;
                 const vacLoss = pgi * vacancy;
                 const egi = pgi - vacLoss;
-                const creditLossAmt = egi * creditLoss;
-                const collectedRevenue = egi - creditLossAmt;
 
-                const taxes = (propTaxes * units / 12) * Math.pow(1 + opexGrowth, year - 1);
-                const ins = (insurance * units / 12) * Math.pow(1 + opexGrowth, year - 1);
-                const mgmt = collectedRevenue * mgmtFee;
-                const repairMaint = (repairs * units / 12) * Math.pow(1 + opexGrowth, year - 1);
-                const totalOpex = taxes + ins + mgmt + repairMaint;
-
-                const noi = collectedRevenue - totalOpex;
+                const baseOpex = pgi * opexRatio;
+                const totalOpex = (baseOpex / 12) * Math.pow(1 + opexGrowth, year - 1);
+                const noi = egi - totalOpex;
                 const capex = (stabilizedCapex * units / 12);
                 const unleveredCF = noi - capex;
 
@@ -269,7 +352,7 @@
                 const annualNOI = yearData.reduce((sum, d) => sum + d.noi, 0);
                 const annualLeveredCF = yearData.reduce((sum, d) => sum + d.leveredCF, 0);
                 const eoyLoanBalance = yearData[yearData.length - 1].currentLoanBalance;
-                const ltv = eoyLoanBalance / purchasePrice; // Simplified LTV for demo
+                const ltv = eoyLoanBalance / purchasePrice;
                 const debtYield = annualNOI / eoyLoanBalance;
                 annualData.push({ year: y, noi: annualNOI, leveredCF: annualLeveredCF, debtYield, ltv });
             }
@@ -289,45 +372,42 @@
             const projectMOIC = propertyCashFlows.slice(1).reduce((a, b) => a + b, 0) / totalEquity;
 
             // --- 7. PARTNERSHIP WATERFALL ---
-            let lpPrefTracker = 0;
+            let lpPrefAccrued = 0;
             let lpReturnOfCapital = lpEquity;
             let gpReturnOfCapital = gpEquity;
+            let lpCF = Array(holdPeriod).fill(0);
+            let gpCF = Array(holdPeriod).fill(0);
 
-            let lpCF = [];
-            let gpCF = [];
-            let totalProfitForDistribution = 0;
+            for (let y = 0; y < holdPeriod; y++) {
+                let cfToDistribute = annualData[y].leveredCF;
+                if (y === holdPeriod - 1) cfToDistribute += netSaleProceeds;
 
-            for (let y = 1; y <= holdPeriod; y++) {
-                let cfToDistribute = annualData[y-1].leveredCF;
-                if (y === holdPeriod) cfToDistribute += netSaleProceeds;
+                // Accrue pref on contributed capital
+                lpPrefAccrued += (lpEquity - (lpEquity - lpReturnOfCapital)) * prefReturn;
 
-                // 1. Return of Capital
-                let lpRocDist = Math.min(cfToDistribute * lpShare, lpReturnOfCapital);
+                // Tier 1: Return of Capital (Pro-Rata)
+                let rocToDistribute = Math.min(cfToDistribute, lpReturnOfCapital + gpReturnOfCapital);
+                let lpRocDist = rocToDistribute * (lpReturnOfCapital / (lpReturnOfCapital + gpReturnOfCapital) || 0);
+                let gpRocDist = rocToDistribute * (gpReturnOfCapital / (lpReturnOfCapital + gpReturnOfCapital) || 0);
                 lpReturnOfCapital -= lpRocDist;
-                lpCF[y-1] = (lpCF[y-1] || 0) + lpRocDist;
-                
-                let gpRocDist = Math.min(cfToDistribute * gpShare, gpReturnOfCapital);
                 gpReturnOfCapital -= gpRocDist;
-                gpCF[y-1] = (gpCF[y-1] || 0) + gpRocDist;
+                lpCF[y] += lpRocDist;
+                gpCF[y] += gpRocDist;
+                cfToDistribute -= rocToDistribute;
 
-                cfToDistribute -= (lpRocDist + gpRocDist);
+                // Tier 2: Preferred Return to LP
+                let prefDist = Math.min(cfToDistribute, lpPrefAccrued);
+                lpCF[y] += prefDist;
+                lpPrefAccrued -= prefDist;
+                cfToDistribute -= prefDist;
 
-                // 2. Preferred Return
-                lpPrefTracker += lpEquity * prefReturn;
-                let lpPrefDist = Math.min(cfToDistribute, lpPrefTracker);
-                lpPrefTracker -= lpPrefDist;
-                lpCF[y-1] += lpPrefDist;
-                cfToDistribute -= lpPrefDist;
-
-                // 3. Promote Split
-                let lpPromoteDist = cfToDistribute * lpPromote;
-                let gpPromoteDist = cfToDistribute * gpPromote;
-                lpCF[y-1] += lpPromoteDist;
-                gpCF[y-1] += gpPromoteDist;
-                
-                totalProfitForDistribution += (lpPrefDist + lpPromoteDist + gpPromoteDist);
+                // Tier 3: Promote Split
+                if (cfToDistribute > 0) {
+                    lpCF[y] += cfToDistribute * lpPromote;
+                    gpCF[y] += cfToDistribute * gpPromote;
+                }
             }
-            
+
             const lpTotalCF = [-lpEquity, ...lpCF];
             const lpIRR = calculateIRR(lpTotalCF);
             const lpMOIC = lpTotalCF.slice(1).reduce((a, b) => a + b, 0) / lpEquity;
@@ -337,9 +417,14 @@
             const gpMOIC = gpTotalCF.slice(1).reduce((a, b) => a + b, 0) / gpEquity;
 
             // --- 8. UI UPDATES ---
-            // Summary Cards
+            // Executive Summary
             $('summaryIRR').textContent = formatPercent(projectIRR);
             $('summaryMOIC').textContent = formatMulti(projectMOIC);
+            $('summaryEquity').textContent = formatMillions(totalEquity);
+            $('summaryExit').textContent = formatMillions(grossExitValue);
+            $('summaryNarrative').textContent = `This ${holdPeriod}-year investment in a ${units}-unit multifamily asset is projected to generate a ${formatPercent(projectIRR)} IRR and a ${formatMulti(projectMOIC)} equity multiple. The strategy involves acquiring the property for ${formatMillions(purchasePrice)} and investing ${formatMillions(renovationBudget)} in value-add renovations. The project is capitalized with ${formatMillions(loanAmount)} in senior debt and requires ${formatMillions(totalEquity)} of equity. At exit, the property is projected to sell for ${formatMillions(grossExitValue)}, based on a ${formatPercent(exitCap)} forward cap rate.`;
+
+            // Returns Summary
             $('lpIRR').textContent = formatPercent(lpIRR);
             $('gpIRR').textContent = formatPercent(gpIRR);
             $('lpMOIC').textContent = formatMulti(lpMOIC);
@@ -363,12 +448,10 @@
                 { label: 'Debt Yield', data: annualData.map(d => formatPercent(d.debtYield)) },
                 { label: 'LTV', data: annualData.map(d => formatPercent(d.ltv)) }
             ];
-            $('proFormaTable').innerHTML = proFormaRows.map(row => `
-                <tr>
-                    <td class="py-2 px-2 font-semibold">${row.label}</td>
-                    ${row.data.map(d => `<td class="py-2 px-2 text-right font-mono">${d}</td>`).join('')}
-                </tr>
-            `).join('');
+            $('proFormaTable').innerHTML = proFormaRows.map(row => `<tr>
+                <td class="py-2 px-2 font-semibold text-gray-700">${row.label}</td>
+                ${row.data.map(d => `<td class="py-2 px-2 text-right font-mono text-gray-800">${d}</td>`).join('')}
+            </tr>`).join('');
 
             // Waterfall Chart
             const profitToLP = lpTotalCF.slice(1).reduce((a, b) => a + b, 0) - lpEquity;
@@ -378,18 +461,19 @@
             waterfallChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['LP (Investors)', 'GP (Sponsor)'],
+                    labels: ['LP (Investors) Profit', 'GP (Sponsor) Profit'],
                     datasets: [{
                         label: 'Profit Distribution',
                         data: [profitToLP, profitToGP],
-                        backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(21, 128, 61, 0.7)'],
-                        borderColor: ['#3B82F6', '#15803D'],
-                        borderWidth: 1
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+                        borderColor: ['#3B82F6', '#10B981'],
+                        borderWidth: 2,
+                        borderRadius: 4
                     }]
                 },
                 options: {
                     indexAxis: 'y',
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => formatCurrency(ctx.raw) } } },
                     scales: { x: { ticks: { callback: (val) => formatCurrency(val) } } }
                 }
             });
@@ -401,4 +485,3 @@
     </script>
 </body>
 </html>
-
