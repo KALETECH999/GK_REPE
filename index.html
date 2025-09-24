@@ -3,485 +3,803 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keystone Underwriting Platform | Value-Add Multifamily</title>
+    <title>Kaletch Underwriting Suite v2.6 | Institutional Model</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root { --accent-color: #3b82f6; }
         body { 
             font-family: 'Inter', sans-serif; 
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        /* Custom styles for input fields for a cleaner look */
         .input-group { display: grid; grid-template-columns: 2fr 1fr; align-items: center; gap: 0.75rem; }
-        .input-group label { font-size: 0.875rem; color: #4b5563; font-weight: 500; }
-        .input-group input { 
-            text-align: right; 
-            font-size: 0.875rem; 
-            padding: 0.5rem; 
-            border-radius: 0.375rem; 
-            border: 1px solid #d1d5db;
-            background-color: #f9fafb;
-            transition: all 0.2s ease-in-out;
+        .input-group label { font-size: 0.875rem; color: #4b5563; font-weight: 500; cursor: pointer; }
+        .input-group input, .input-group select, .input-group textarea { 
+            text-align: right; font-size: 0.875rem; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #d1d5db;
+            background-color: #f9fafb; transition: all 0.2s ease-in-out;
         }
-        .input-group input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background-color: #fff;
+        .input-group textarea { text-align: left; font-family: monospace; font-size: 0.8rem; }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none; border-color: var(--accent-color); background-color: #fff;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
-        /* Section headers */
+        .input-group input:disabled, .input-group select:disabled, .input-group textarea:disabled { background-color: #e5e7eb; cursor: not-allowed; }
         h3 { 
-            font-size: 1rem; 
-            font-weight: 700; 
-            color: #111827;
-            border-bottom: 1px solid #e5e7eb; 
-            padding-bottom: 0.5rem; 
-            margin-bottom: 1rem; 
-            margin-top: 1.5rem; 
+            font-size: 1rem; font-weight: 700; color: #111827;
+            border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 1.5rem; 
         }
-        /* Print-specific styles for the export function */
+        .validation-error { border-color: #ef4444 !important; }
+        .tab { cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent; transition: all 0.2s ease-in-out; }
+        .tab.active { color: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
+        [title] { text-decoration: underline dotted; text-decoration-color: #9ca3af; text-underline-offset: 2px; cursor: help; }
+        .disabled-section { opacity: 0.4; pointer-events: none; user-select: none; }
         @media print {
-            body {
-                background-color: #fff !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .print-container {
-                display: block !important;
-                width: 100% !important;
-                box-shadow: none !important;
-                border: none !important;
-            }
-             .grid {
-                display: block;
-            }
-            .print-break-after {
-                break-after: page;
+            body { background-color: #fff !important; }
+            .no-print, aside { display: none !important; }
+            main, .print-container { 
+                display: block !important; width: 100% !important; box-shadow: none !important; 
+                border: none !important; height: auto !important; overflow: visible !important;
             }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
+<body class="bg-gray-100 text-gray-900">
 
-    <div class="container mx-auto p-4 lg:p-8">
-        <!-- Header -->
-        <header class="mb-8 text-center no-print">
-            <div class="flex items-center justify-center gap-3 mb-2">
-                 <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                </svg>
-                <h1 class="text-4xl font-extrabold tracking-tight text-gray-900">Keystone Underwriting Platform</h1>
+    <div class="flex h-screen">
+        <!-- Left Panel: Inputs -->
+        <aside class="w-1/3 bg-white p-6 shadow-lg h-full overflow-y-auto no-print">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="h-7 w-7 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
+                <h1 class="text-2xl font-bold text-gray-900">Kaletch Underwriting Suite <span class="text-base font-medium text-gray-500 align-top">v2.6</span></h1>
             </div>
-            <p class="text-lg text-gray-600">Institutional-grade analysis of a $50M multifamily value-add acquisition.</p>
-        </header>
+            <p class="text-sm text-gray-600 mb-4">Institutional modeler with a modular calculation engine.</p>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column: Inputs -->
-            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200 h-fit no-print">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">Deal Assumptions</h2>
-                
-                <h3>Acquisition & Property</h3>
-                <div class="space-y-3">
-                    <div class="input-group"><label>Purchase Price</label><input type="number" id="purchasePrice" value="50000000"></div>
-                    <div class="input-group"><label>Closing Costs (% of Price)</label><input type="number" id="closingCosts" value="2.5"></div>
-                    <div class="input-group"><label>Number of Units</label><input type="number" id="units" value="250"></div>
-                    <div class="input-group"><label>Renovation Budget ($/Unit)</label><input type="number" id="renovationPerUnit" value="15000"></div>
-                </div>
-
-                <h3>Financing (Senior Debt)</h3>
-                <div class="space-y-3">
-                    <div class="input-group"><label>Loan-to-Cost (%)</label><input type="number" id="ltc" value="65"></div>
-                    <div class="input-group"><label>Interest Rate (%)</label><input type="number" id="interestRate" value="6.0"></div>
-                    <div class="input-group"><label>Amortization (Years)</label><input type="number" id="amortization" value="30"></div>
-                    <div class="input-group"><label>Interest-Only Period (Months)</label><input type="number" id="ioPeriod" value="24"></div>
-                    <div class="input-group"><label>Financing Fees (% of Loan)</label><input type="number" id="financingFees" value="1.0"></div>
-                </div>
-
-                <h3>Operations & Revenue</h3>
-                <div class="space-y-3">
-                    <div class="input-group"><label>Avg. Starting Rent ($/Mo)</label><input type="number" id="startRent" value="1500"></div>
-                    <div class="input-group"><label>Market Rent Growth (%/Yr)</label><input type="number" id="rentGrowth" value="3.0"></div>
-                    <div class="input-group"><label>General Vacancy (%)</label><input type="number" id="vacancy" value="5.0"></div>
-                    <div class="input-group"><label>Operating Expense Ratio (%)</label><input type="number" id="opexRatio" value="40"></div>
-                    <div class="input-group"><label>OpEx Growth (%/Yr)</label><input type="number" id="opexGrowth" value="2.5"></div>
-                    <div class="input-group"><label>Stabilized CapEx ($/Unit/Yr)</label><input type="number" id="stabilizedCapex" value="250"></div>
-                </div>
-
-                <h3>Exit & Partnership</h3>
-                <div class="space-y-3">
-                    <div class="input-group"><label>Hold Period (Years)</label><input type="number" id="holdPeriod" value="5"></div>
-                    <div class="input-group"><label>Exit Cap Rate (%)</label><input type="number" id="exitCap" value="5.25"></div>
-                    <div class="input-group"><label>Cost of Sale (%)</label><input type="number" id="costOfSale" value="1.5"></div>
-                    <div class="input-group"><label>LP Equity Share (%)</label><input type="number" id="lpShare" value="90"></div>
-                    <div class="input-group"><label>Preferred Return (%)</label><input type="number" id="prefReturn" value="8.0"></div>
-                    <div class="input-group"><label>Promote Split (% GP/LP)</label><input type="text" id="promoteSplit" value="20 / 80"></div>
-                </div>
-
-                <button id="calculateBtn" class="mt-8 w-full bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300">Run Underwriting</button>
-                <button onclick="window.print()" class="mt-4 w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transition duration-300">
-                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.32 0c.662 0 1.18.568 1.12 1.227l-.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.32 0l-3.232-3.232m-3.232 0l-3.232 3.232M9 6l3 3m0 0l3-3m-3 3v6.75" /></svg>
-                    Export Report
-                </button>
+            <div id="validationSummary" class="text-sm text-red-600 mb-4 min-h-[1rem]" aria-live="polite"></div>
+            
+            <h3>Deal Presets</h3>
+            <div class="input-group"><label for="dealPreset">Select a Preset</label>
+                <select id="dealPreset" title="Load common assumptions for different deal types. Custom changes will be overwritten.">
+                    <option value="custom">Custom</option>
+                    <option value="valueAdd">Value-Add (Default)</option>
+                    <option value="corePlus">Core-Plus</option>
+                    <option value="core">Core</option>
+                </select>
             </div>
 
-            <!-- Right Column: Outputs -->
-            <div class="lg:col-span-2 space-y-8 print-container">
-                 <!-- Executive Summary Card -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 print-break-after">
+            <h3>Property & Acquisition</h3>
+            <div class="space-y-3">
+                <div class="input-group"><label for="propertyName">Property Name</label><input type="text" id="propertyName" value="The Landmark"></div>
+                <div class="input-group"><label for="propertyType">Property Type</label>
+                    <select id="propertyType">
+                        <option>Multifamily</option><option>Office</option><option>Retail</option><option>Industrial</option>
+                    </select>
+                </div>
+                <div class="input-group"><label for="purchasePrice">Purchase Price</label><input type="number" id="purchasePrice" value="50000000" step="100000"></div>
+                <div class="input-group"><label for="closingCosts">Closing Costs (% of Price)</label><input type="number" id="closingCosts" value="2.5" step="0.1" min="0"></div>
+                <div class="input-group"><label for="units">Number of Units / SF</label><input type="number" id="units" value="250" step="1" min="1"></div>
+            </div>
+
+            <h3>Value-Add Renovations</h3>
+            <div class="space-y-3">
+                <div class="input-group"><label for="renovationPerUnit">Renovation Budget ($/Unit)</label><input type="number" id="renovationPerUnit" value="15000" step="1000" min="0"></div>
+                <div class="input-group"><label for="renoCompletionMonths">Reno Completion (Months)</label><input type="number" id="renoCompletionMonths" value="12" step="1" min="0"></div>
+                <div class="input-group"><label for="postRenoRentPremium" title="The percentage rent increase achieved after renovations are complete.">Post-Reno Rent Premium (%)</label><input type="number" id="postRenoRentPremium" value="15" step="1" min="0"></div>
+            </div>
+
+            <h3>Financing</h3>
+            <div class="space-y-3">
+                <div class="input-group"><label for="ltc" title="Loan-to-Cost: The percentage of the total project cost financed by the loan.">Loan-to-Cost (%)</label><input type="number" id="ltc" value="65" step="1" min="0" max="100"></div>
+                <div class="input-group"><label for="interestRate">Interest Rate (%)</label><input type="number" id="interestRate" value="4.5" step="0.1" min="0"></div>
+                <div class="input-group"><label for="amortization">Amortization (Years)</label><input type="number" id="amortization" value="30" step="1" min="0"></div>
+                <div class="input-group"><label for="ioPeriod" title="Interest-Only Period: A period where only interest is paid on the loan, not principal.">I/O Period (Months)</label><input type="number" id="ioPeriod" value="24" step="1" min="0"></div>
+                <div class="input-group"><label for="financingFees">Financing Fees (% of Loan)</label><input type="number" id="financingFees" value="1.0" step="0.1" min="0"></div>
+            </div>
+
+            <h3>Operations & Revenue</h3>
+            <div class="space-y-3">
+                <div class="input-group"><label for="startRent">Avg. Starting Rent ($/Mo)</label><input type="number" id="startRent" value="1500" step="25" min="0"></div>
+                <div class="input-group"><label for="vacancy">Vacancy Rate (%)</label><input type="number" id="vacancy" value="5.0" step="0.5" min="0" max="100"></div>
+                <div class="input-group"><label for="rentGrowth">Market Rent Growth (%/Yr)</label><input type="number" id="rentGrowth" value="3.0" step="0.1"></div>
+                <div class="input-group"><label for="opexRatio" title="OpEx is calculated based on Year 1 PGI, then grown annually by the OpEx Growth rate.">OpEx Ratio (% of PGI)</label><input type="number" id="opexRatio" value="40" step="1" min="0"></div>
+                <div class="input-group"><label for="opexGrowth">OpEx Growth (%/Yr)</label><input type="number" id="opexGrowth" value="2.5" step="0.1"></div>
+                <div class="input-group"><label for="stabilizedCapex" title="Annual reserve for capital expenditures for a stabilized property, per unit or SF.">Stabilized CapEx ($/Unit/Yr)</label><input type="number" id="stabilizedCapex" value="250" step="10" min="0"></div>
+            </div>
+
+            <h3>Exit & Partnership</h3>
+            <div class="space-y-3">
+                <div class="input-group"><label for="holdPeriod">Hold Period (Years)</label><input type="number" id="holdPeriod" value="5" step="1" min="1"></div>
+                <div class="input-group"><label for="exitCap">Exit Cap Rate (%)</label><input type="number" id="exitCap" value="4.75" step="0.05" min="0.1"></div>
+                 <div class="input-group"><label for="terminalGrowthRate" title="The growth rate applied to final year NOI to calculate exit value.">Terminal Growth Rate (%)</label><input type="number" id="terminalGrowthRate" value="3.0" step="0.1"></div>
+                <div class="input-group"><label for="costOfSale">Cost of Sale (%)</label><input type="number" id="costOfSale" value="1.5" step="0.1" min="0"></div>
+                <div class="input-group"><label for="lpShare">LP Equity Share (%)</label><input type="number" id="lpShare" value="90" step="1" min="0" max="100"></div>
+            </div>
+            
+            <h3 class="flex justify-between items-center">
+                <span>Waterfall (JSON)</span>
+                <button id="restoreDefaultWaterfall" class="text-xs font-semibold text-blue-600 hover:text-blue-800">Restore Default</button>
+            </h3>
+            <div class="space-y-2 text-sm">
+                <p class="text-gray-600">Define the partnership waterfall as an ordered JSON array of tiers. Leave blank for project-level analysis only.</p>
+                <div class="input-group"><label for="waterfallJson" class="sr-only">Waterfall Tiers</label>
+<textarea id="waterfallJson" rows="8" class="col-span-2"></textarea>
+                </div>
+            </div>
+
+            <button id="calculateBtn" class="mt-8 w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center">
+                <span id="btnText">Run Underwriting</span>
+                <svg id="btnSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </button>
+            <div class="flex items-center gap-4 mt-4">
+                <button id="resetBtn" class="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300 text-sm">Reset</button>
+                <button id="csvBtn" class="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300 text-sm">Export CSV</button>
+                <button onclick="window.print()" class="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300 text-sm">Print</button>
+            </div>
+
+            <!-- Footer Section -->
+            <footer class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+                <p class="mb-4">&copy; 2025 Gautam Kale. All rights reserved.</p>
+                <div class="flex justify-center items-center space-x-5">
+                    <a href="mailto:kaletech.ai@gmail.com" title="kaletech.ai@gmail.com" class="hover:text-blue-600 transition-colors">
+                        <span class="sr-only">Email Kaletech AI</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v.511l8.26 5.507a2 2 0 0 0 2.48 0L21 5.511V5H3zm.239 12h17.522l-6.26-4.173-2.501 1.667a1 1 0 0 1-1.24 0l-2.501-1.667L3.239 17z"/></svg>
+                    </a>
+                    <a href="mailto:gautam.kale1999@gmail.com" title="gautam.kale1999@gmail.com" class="hover:text-blue-600 transition-colors">
+                        <span class="sr-only">Email Gautam Kale</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v.511l8.26 5.507a2 2 0 0 0 2.48 0L21 5.511V5H3zm.239 12h17.522l-6.26-4.173-2.501 1.667a1 1 0 0 1-1.24 0l-2.501-1.667L3.239 17z"/></svg>
+                    </a>
+                    <a href="https://github.com/KALETECH999" target="_blank" rel="noopener noreferrer" title="GitHub Profile" class="hover:text-gray-800 transition-colors">
+                        <span class="sr-only">GitHub</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/gautam-kale-206a81171/" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" class="hover:text-blue-700 transition-colors">
+                        <span class="sr-only">LinkedIn</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </a>
+                </div>
+            </footer>
+        </aside>
+
+        <!-- Main Panel: Outputs -->
+        <main class="w-2/3 p-8 h-full overflow-y-auto print-container">
+            <header class="flex border-b border-gray-200 mb-6">
+                <div id="tab-dashboard" class="tab active">Dashboard</div>
+                <div id="tab-proforma" class="tab">Pro Forma</div>
+                <div id="tab-sensitivity" class="tab">Sensitivity Analysis</div>
+            </header>
+
+            <div id="output-dashboard">
+                <div id="modelAlerts" class="mb-6 space-y-2" aria-live="polite"></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 mb-8">
                     <h2 class="text-xl font-bold mb-4 text-gray-800">Executive Summary</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Project IRR</p>
-                            <p id="summaryIRR" class="text-4xl font-extrabold text-emerald-600">0.0%</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Equity Multiple</p>
-                            <p id="summaryMOIC" class="text-4xl font-extrabold text-emerald-600">0.00x</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Total Equity Req.</p>
-                            <p id="summaryEquity" class="text-4xl font-extrabold text-gray-800">$0.0M</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Exit Value</p>
-                            <p id="summaryExit" class="text-4xl font-extrabold text-gray-800">$0.0M</p>
-                        </div>
+                        <div><p class="text-sm font-medium text-gray-500">Project IRR</p><p id="summaryIRR" class="text-4xl font-extrabold text-emerald-600">--%</p></div>
+                        <div><p class="text-sm font-medium text-gray-500">Equity Multiple</p><p id="summaryMOIC" class="text-4xl font-extrabold text-emerald-600">--x</p></div>
+                        <div><p class="text-sm font-medium text-gray-500">Total Equity Req.</p><p id="summaryEquity" class="text-4xl font-extrabold text-gray-800">--M</p></div>
+                        <div><p class="text-sm font-medium text-gray-500">Exit Value</p><p id="summaryExit" class="text-4xl font-extrabold text-gray-800">--M</p></div>
                     </div>
-                    <div class="mt-6 text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
-                        <p id="summaryNarrative">Generating investment summary...</p>
-                    </div>
+                    <div class="mt-6 text-sm text-gray-700 bg-gray-50 p-4 rounded-lg"><p id="summaryNarrative">Enter deal assumptions to generate the investment summary.</p></div>
+                     <div id="benchmarkNote" class="mt-4 text-xs text-center text-gray-500"></div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Capital Stack Card -->
                     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                         <h2 class="text-xl font-bold mb-4 text-gray-800">Project Capitalization</h2>
                         <div class="space-y-2 text-sm">
                             <h4 class="font-semibold text-gray-600">Sources</h4>
-                            <div class="flex justify-between"><p>Senior Debt</p><p id="sourceDebt" class="font-mono">$0.0M</p></div>
-                            <div class="flex justify-between"><p>Sponsor Equity (GP)</p><p id="sourceGPEquity" class="font-mono">$0.0M</p></div>
-                            <div class="flex justify-between"><p>Investor Equity (LP)</p><p id="sourceLPEquity" class="font-mono">$0.0M</p></div>
-                            <hr class="my-2">
-                            <div class="flex justify-between font-bold"><p>Total Sources</p><p id="sourceTotal" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Senior Debt</p><div class="flex gap-4 items-center"><span id="sourceDebtPct" class="font-mono text-gray-500">0.0%</span><span id="sourceDebt" class="font-mono w-24 text-right">$0.00M</span></div></div>
+                            <div class="flex justify-between"><p>Sponsor Equity (GP)</p><div class="flex gap-4 items-center"><span id="sourceGPEquityPct" class="font-mono text-gray-500">0.0%</span><span id="sourceGPEquity" class="font-mono w-24 text-right">$0.00M</span></div></div>
+                            <div class="flex justify-between"><p>Investor Equity (LP)</p><div class="flex gap-4 items-center"><span id="sourceLPEquityPct" class="font-mono text-gray-500">0.0%</span><span id="sourceLPEquity" class="font-mono w-24 text-right">$0.00M</span></div></div>
+                            <hr class="my-2"><div class="flex justify-between font-bold"><p>Total Sources</p><p id="sourceTotal" class="font-mono w-24 text-right">$0.00M</p></div>
                         </div>
                         <div class="space-y-2 text-sm mt-4">
                             <h4 class="font-semibold text-gray-600">Uses</h4>
-                            <div class="flex justify-between"><p>Purchase Price</p><p id="usePrice" class="font-mono">$0.0M</p></div>
-                            <div class="flex justify-between"><p>Renovation Budget</p><p id="useReno" class="font-mono">$0.0M</p></div>
-                            <div class="flex justify-between"><p>Closing Costs</p><p id="useClosing" class="font-mono">$0.0M</p></div>
-                            <div class="flex justify-between"><p>Financing Fees</p><p id="useFinancing" class="font-mono">$0.0M</p></div>
-                            <hr class="my-2">
-                            <div class="flex justify-between font-bold"><p>Total Uses</p><p id="useTotal" class="font-mono">$0.0M</p></div>
+                            <div class="flex justify-between"><p>Purchase Price</p><p id="usePrice" class="font-mono w-24 text-right">$0.00M</p></div>
+                            <div class="flex justify-between"><p>Renovation Budget</p><p id="useReno" class="font-mono w-24 text-right">$0.00M</p></div>
+                            <div class="flex justify-between"><p>Closing Costs</p><p id="useClosing" class="font-mono w-24 text-right">$0.00M</p></div>
+                            <div class="flex justify-between"><p>Financing Fees</p><p id="useFinancing" class="font-mono w-24 text-right">$0.00M</p></div>
+                            <hr class="my-2"><div class="flex justify-between font-bold"><p>Total Uses</p><p id="useTotal" class="font-mono w-24 text-right">$0.00M</p></div>
                         </div>
                     </div>
-
-                    <!-- Returns Summary Card -->
-                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                     <div id="partnershipReturns" class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                         <h2 class="text-xl font-bold mb-4 text-gray-800">Partnership Returns</h2>
                         <div class="grid grid-cols-2 gap-y-4 gap-x-2">
-                            <div class="text-center p-2 rounded-lg bg-emerald-50">
-                                <p class="text-xs font-bold text-emerald-800">LP IRR</p>
-                                <p id="lpIRR" class="text-2xl font-bold text-emerald-700">0.0%</p>
-                            </div>
-                            <div class="text-center p-2 rounded-lg bg-emerald-50">
-                                <p class="text-xs font-bold text-emerald-800">GP IRR</p>
-                                <p id="gpIRR" class="text-2xl font-bold text-emerald-700">0.0%</p>
-                            </div>
-                             <div class="text-center p-2 rounded-lg bg-gray-100">
-                                <p class="text-xs font-bold text-gray-600">LP Multiple</p>
-                                <p id="lpMOIC" class="text-2xl font-bold text-gray-800">0.00x</p>
-                            </div>
-                            <div class="text-center p-2 rounded-lg bg-gray-100">
-                                <p class="text-xs font-bold text-gray-600">GP Multiple</p>
-                                <p id="gpMOIC" class="text-2xl font-bold text-gray-800">0.00x</p>
-                            </div>
+                            <div class="text-center p-2 rounded-lg bg-emerald-50"><p class="text-xs font-bold text-emerald-800">LP IRR</p><p id="lpIRR" class="text-2xl font-bold text-emerald-700">--%</p></div>
+                            <div class="text-center p-2 rounded-lg bg-emerald-50"><p class="text-xs font-bold text-emerald-800">GP IRR</p><p id="gpIRR" class="text-2xl font-bold text-emerald-700">--%</p></div>
+                            <div class="text-center p-2 rounded-lg bg-gray-100"><p class="text-xs font-bold text-gray-600">LP Multiple</p><p id="lpMOIC" class="text-2xl font-bold text-gray-800">--x</p></div>
+                            <div class="text-center p-2 rounded-lg bg-gray-100"><p class="text-xs font-bold text-gray-600">GP Multiple</p><p id="gpMOIC" class="text-2xl font-bold text-gray-800">--x</p></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Annual Pro Forma Cash Flow</h2>
-                    <div class="overflow-x-auto text-xs">
-                        <table class="min-w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="py-2 px-2 text-left font-semibold">Metric</th>
-                                    <th class="py-2 px-2 text-right font-semibold">Yr 1</th>
-                                    <th class="py-2 px-2 text-right font-semibold">Yr 2</th>
-                                    <th class="py-2 px-2 text-right font-semibold">Yr 3</th>
-                                    <th class="py-2 px-2 text-right font-semibold">Yr 4</th>
-                                    <th class="py-2 px-2 text-right font-semibold">Yr 5</th>
-                                </tr>
-                            </thead>
-                            <tbody id="proFormaTable" class="divide-y divide-gray-200">
-                            </tbody>
-                        </table>
+                 <div id="waterfallDistribution" class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 mt-8">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Waterfall Distribution Summary</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                           <div class="relative h-64 md:h-80"><canvas id="waterfallChart"></canvas></div>
+                        </div>
+                        <div class="text-sm">
+                           <h4 class="font-semibold text-gray-600 mb-2">Profit Distribution Summary</h4>
+                           <div class="space-y-2">
+                              <div class="flex justify-between"><p>Total Profit to LP</p><p id="lpProfit" class="font-mono">$0.00M</p></div>
+                              <div class="flex justify-between"><p>Total Profit to GP</p><p id="gpProfit" class="font-mono">$0.00M</p></div>
+                              <hr class="my-2">
+                              <div class="flex justify-between font-bold"><p>Total Project Profit</p><p id="totalProfit" class="font-mono">$0.00M</p></div>
+                              <div class="flex justify-between text-xs text-gray-500 mt-2"><p>LP Share of Profit</p><p id="lpProfitShare" class="font-mono">--%</p></div>
+                              <div class="flex justify-between text-xs text-gray-500"><p>GP Share of Profit</p><p id="gpProfitShare" class="font-mono">--%</p></div>
+                           </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Profit Distribution Waterfall</h2>
-                    <canvas id="waterfallChart"></canvas>
+            <div id="output-proforma" class="hidden">
+                 <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Annual Pro Forma Cash Flow</h2>
+                    <div class="overflow-x-auto text-sm"><table class="min-w-full"><thead class="bg-gray-50"><tr id="proFormaHeader"></tr></thead><tbody id="proFormaTable" class="divide-y divide-gray-200"></tbody></table></div>
                 </div>
             </div>
-        </div>
+
+            <div id="output-sensitivity" class="hidden">
+                 <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Sensitivity Analysis: Project IRR</h2>
+                    <p class="text-sm text-gray-600 mb-4">Analyzes Project IRR based on changes in Exit Cap Rate and Hold Period.</p>
+                    <div class="overflow-x-auto text-sm" id="sensitivityTableContainer"></div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        // --- UTILITY FUNCTIONS ---
+        /**
+         * Kaletch Underwriting Suite v2.6
+         * Final, polished production version.
+         * Key Enhancements:
+         * 1. Preset Confirmation: Added a confirmation dialog to prevent accidental overwrites.
+         * 2. Sanitized CSV Filename: Robustly sanitizes property name for CSV export.
+         * 3. Sourced Benchmarks: UI note now clarifies the source of market IRR data.
+         * 4. Documentation: A comprehensive README.md file is provided alongside this tool.
+         */
         const $ = (id) => document.getElementById(id);
-        const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
-        const formatMillions = (val) => `$${(val / 1000000).toFixed(1)}M`;
-        const formatPercent = (val) => `${(val * 100).toFixed(1)}%`;
-        const formatMulti = (val) => `${val.toFixed(2)}x`;
+        const formatCurrency = (val, digits = 0) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+        const formatMillions = (val) => `$${(val / 1000000).toFixed(2)}M`;
+        const formatPercent = (val, digits = 1) => {
+            if (isNaN(val) || !isFinite(val)) return "N/A";
+            if (Math.abs(val) < 1e-10) return "0.0%";
+            return `${(val * 100).toFixed(digits)}%`;
+        };
+        const formatMulti = (val) => (isNaN(val) || !isFinite(val)) ? "N/A" : `${val.toFixed(2)}x`;
+        
+        const DEFAULT_WATERFALL_JSON = JSON.stringify([
+            { "name": "1. Preferred Return", "type": "pref", "rate": 8.0 },
+            { "name": "2. Return of Capital", "type": "returnOfCapital" },
+            { "name": "3. GP Catch-up", "type": "catchup", "gpShare": 100 },
+            { "name": "4. Final Split", "type": "split", "lp": 80, "gp": 20 }
+        ], null, 2);
+
+        const BENCHMARKS = {
+            Multifamily: "15-20%",
+            Office: "10-15%",
+            Retail: "12-16%",
+            Industrial: "13-18%"
+        };
+
         let waterfallChart;
+        let lastResultsForCSV = null;
+        const ALL_INPUT_IDS = Array.from(document.querySelectorAll('aside input, aside select, aside textarea')).map(el => el.id);
 
-        // --- IRR SOLVER (Net Present Value) ---
-        function npv(rate, cashFlows) {
-            let npv = 0;
-            for (let i = 0; i < cashFlows.length; i++) {
-                npv += cashFlows[i] / Math.pow(1 + rate, i);
+        function calculateIRR(cfs, guess = 0.1) {
+            if (cfs.every(cf => cf <= 0) || cfs.every(cf => cf >= 0)) return NaN;
+            const maxIter = 1000, tol = 1e-7;
+            let rate = guess;
+            for (let i = 0; i < maxIter; i++) {
+                let npv = 0, dNPV = 0;
+                for (let t = 0; t < cfs.length; t++) {
+                    npv += cfs[t] / Math.pow(1 + rate, t);
+                    if (t > 0) dNPV -= t * cfs[t] / Math.pow(1 + rate, t + 1);
+                }
+                if (Math.abs(dNPV) < 1e-10) return NaN;
+                const newRate = rate - npv / dNPV;
+                if (Math.abs(newRate - rate) < tol) return newRate;
+                rate = newRate;
             }
-            return npv;
+            return NaN;
         }
 
-        function calculateIRR(cashFlows, guess = 0.1) {
-            const MAX_ITER = 100;
-            const TOLERANCE = 1e-7;
-            let low = -0.99, high = 1.0;
-
-            // Ensure first cash flow is negative
-            if (cashFlows[0] >= 0) { return 0; }
+        const underwritingModel = {
             
-            let mid = guess;
-            for (let i = 0; i < MAX_ITER; i++) {
-                const npvMid = npv(mid, cashFlows);
-                if (Math.abs(npvMid) < TOLERANCE) {
-                    return mid;
+            runSingleScenario(inputs) {
+                const { monthlyData, finalLoanBalance } = this.generateCashFlows(inputs);
+                const annualData = Array.from({ length: Math.round(inputs.holdPeriod) }, (_, i) => {
+                    const yearMonths = monthlyData.slice(i * 12, (i + 1) * 12);
+                    const sum = (key) => yearMonths.reduce((s, row) => s + row[key], 0);
+                    const noi = sum('noi');
+                    const debtService = sum('debtService');
+                    return { year: i + 1, pgi: sum('pgi'), egi: sum('egi'), opex: sum('opex'), noi, capex: sum('capex'), debtService, leveredCF: sum('leveredCF'), dscr: debtService > 0 ? noi / debtService : Infinity };
+                });
+                
+                const forwardNOI = annualData.length > 0 ? annualData[annualData.length - 1].noi * (1 + inputs.terminalGrowthRate) : 0;
+                const grossExitValue = inputs.exitCap > 0 ? forwardNOI / inputs.exitCap : 0;
+                const costOfSaleVal = grossExitValue * inputs.costOfSale;
+                const netSaleProceeds = grossExitValue - costOfSaleVal - finalLoanBalance;
+                
+                const projectCashFlows = [-inputs.equityRequired, ...annualData.map(d => d.leveredCF)];
+                if (projectCashFlows.length > 1) projectCashFlows[projectCashFlows.length - 1] += netSaleProceeds;
+                
+                const projectIRR = calculateIRR(projectCashFlows);
+                return { projectIRR, annualData, netSaleProceeds, grossExitValue };
+            },
+
+            generateCashFlows(inputs) {
+                const monthlyData = [];
+                const holdMonths = Math.round(inputs.holdPeriod * 12);
+                let currentLoanBalance = inputs.seniorLoanAmount;
+                const monthlyInterestRate = inputs.interestRate / 12;
+                const amortizationMonths = inputs.amortization * 12;
+                const monthlyPmt = (amortizationMonths > 0 && monthlyInterestRate > 0) 
+                    ? (inputs.seniorLoanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -amortizationMonths)) 
+                    : (amortizationMonths > 0 ? inputs.seniorLoanAmount / amortizationMonths : 0);
+                
+                const yearOneAnnualPGI = inputs.startRent * inputs.units * 12;
+                const yearOneMonthlyOpex = (yearOneAnnualPGI * inputs.opexRatio) / 12;
+                // NOTE: Key calcs like revenue and debt service are monthly. They are aggregated to annual for the pro forma.
+                // This provides more accuracy than a pure annual model, especially for mid-year events like reno completion.
+                for (let m = 1; m <= holdMonths; m++) {
+                    const year = Math.ceil(m / 12);
+                    const rentPremium = (m > inputs.renoCompletionMonths) ? (1 + inputs.postRenoRentPremium) : 1;
+                    const currentRent = inputs.startRent * Math.pow(1 + inputs.rentGrowth, year - 1) * rentPremium;
+                    const pgi = inputs.units * currentRent;
+                    const egi = pgi * (1 - inputs.vacancy);
+                    const opex = yearOneMonthlyOpex * Math.pow(1 + inputs.opexGrowth, year - 1);
+                    const noi = egi - opex;
+                    const capex = (inputs.stabilizedCapex * inputs.units) / 12;
+                    const interestPmt = currentLoanBalance * monthlyInterestRate;
+                    const principalPmt = (m > inputs.ioPeriod && amortizationMonths > 0) ? Math.max(0, monthlyPmt - interestPmt) : 0;
+                    const debtService = interestPmt + principalPmt;
+                    const leveredCF = noi - capex - debtService;
+                    currentLoanBalance -= principalPmt;
+                    monthlyData.push({ month: m, pgi, egi, opex, noi, capex, leveredCF, debtService });
                 }
-                if (npv(low, cashFlows) * npvMid < 0) {
-                    high = mid;
-                } else {
-                    low = mid;
+                return { monthlyData, finalLoanBalance: currentLoanBalance };
+            },
+
+            computeParametricWaterfall(inputs, annualData, netSaleProceeds) {
+                if (!inputs.waterfallTiers) return { lpAnnualCFs: [], gpAnnualCFs: [], tierResults: null };
+                
+                let lpCapitalRemaining = inputs.lpEquity;
+                let gpCapitalRemaining = inputs.gpEquity;
+                let lpPrefAccrued = 0;
+                
+                const tierResults = inputs.waterfallTiers.map(t => ({ name: t.name || t.type, lp: 0, gp: 0 }));
+                const lpAnnualCFs = [], gpAnnualCFs = [];
+                
+                const prefTier = inputs.waterfallTiers.find(t => t.type === 'pref');
+                const prefRate = prefTier && prefTier.rate ? prefTier.rate / 100 : 0;
+                const finalSplitTier = inputs.waterfallTiers.find(t => t.type === 'split');
+                
+                for (let y = 0; y < inputs.holdPeriod; y++) {
+                    lpPrefAccrued += (lpCapitalRemaining + lpPrefAccrued) * prefRate;
+
+                    let cashToDistribute = Math.max(0, annualData[y].leveredCF + (y === inputs.holdPeriod - 1 ? netSaleProceeds : 0));
+                    let lpDistYear = 0, gpDistYear = 0;
+
+                    inputs.waterfallTiers.forEach((tier, tierIndex) => {
+                        if (cashToDistribute < 1e-6) return;
+                        let lpDistTier = 0, gpDistTier = 0;
+
+                        if (tier.type === 'returnOfCapital') {
+                            const totalOutstanding = lpCapitalRemaining + gpCapitalRemaining;
+                            if (totalOutstanding > 0) {
+                                const dist = Math.min(cashToDistribute, totalOutstanding);
+                                const lpShare = lpCapitalRemaining / totalOutstanding;
+                                lpDistTier = Math.min(dist * lpShare, lpCapitalRemaining);
+                                gpDistTier = Math.min(dist * (1 - lpShare), gpCapitalRemaining);
+                                lpCapitalRemaining -= lpDistTier;
+                                gpCapitalRemaining -= gpDistTier;
+                            }
+                        } else if (tier.type === 'pref') {
+                            lpDistTier = Math.min(cashToDistribute, lpPrefAccrued);
+                            lpPrefAccrued -= lpDistTier;
+                        } else if (tier.type === 'catchup' && finalSplitTier) {
+                            const gpFinalPromotePct = (finalSplitTier.gp || 0) / 100;
+                            const totalProfitToLP = Math.max(0, tierResults.reduce((sum, r) => sum + r.lp, 0) - inputs.lpEquity);
+                            const gpTargetProfit = (1 - gpFinalPromotePct > 0) ? (totalProfitToLP / (1 - gpFinalPromotePct)) * gpFinalPromotePct : 0;
+                            const currentGPProfit = Math.max(0, tierResults.reduce((sum, r) => sum + r.gp, 0) - inputs.gpEquity);
+                            const catchUpNeeded = Math.max(0, gpTargetProfit - currentGPProfit);
+                            const gpShare = (tier.gpShare || 100) / 100;
+                            const distForCatchup = catchUpNeeded > 0 && gpShare > 0 ? catchUpNeeded / gpShare : 0;
+                            const dist = Math.min(cashToDistribute, distForCatchup);
+                            gpDistTier = dist * gpShare;
+                            lpDistTier = dist * (1 - gpShare);
+                        } else if (tier.type === 'split') {
+                            const lpShare = (tier.lp || 0) / 100;
+                            const gpShare = (tier.gp || 0) / 100;
+                            lpDistTier = cashToDistribute * lpShare;
+                            gpDistTier = cashToDistribute * gpShare;
+                        }
+
+                        cashToDistribute -= (lpDistTier + gpDistTier);
+                        tierResults[tierIndex].lp += lpDistTier;
+                        tierResults[tierIndex].gp += gpDistTier;
+                        lpDistYear += lpDistTier;
+                        gpDistYear += gpDistTier;
+                    });
+                    
+                    lpAnnualCFs.push(lpDistYear);
+                    gpAnnualCFs.push(gpDistYear);
                 }
-                mid = (low + high) / 2;
+                return { lpAnnualCFs, gpAnnualCFs, tierResults };
+            },
+
+            parseAndValidateInputs() {
+                const raw = {};
+                ALL_INPUT_IDS.forEach(id => {
+                    const el = $(id);
+                    raw[id] = (el.type === 'number' || el.type === 'textarea' || el.tagName === 'SELECT') ? el.value : el.value;
+                });
+
+                document.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
+                const errors = new Set();
+                const check = (id, condition, msg) => { if (condition) { $(id)?.classList.add('validation-error'); errors.add(msg); }};
+                
+                for (const key in raw) {
+                     if (!['propertyName', 'propertyType', 'waterfallJson', 'dealPreset'].includes(key)) {
+                        raw[key] = parseFloat(raw[key]);
+                        if (isNaN(raw[key])) errors.add(`${key} must be a valid number.`);
+                    }
+                }
+
+                check('purchasePrice', raw.purchasePrice <= 0, "Purchase Price must be positive.");
+                check('units', raw.units <= 0, "Units/SF must be positive.");
+                check('holdPeriod', raw.holdPeriod < 1 || !Number.isInteger(raw.holdPeriod), "Hold Period must be a whole number of at least 1.");
+                check('exitCap', raw.exitCap <= 0.01, "Exit Cap Rate must be positive.");
+                check('interestRate', raw.interestRate < 0, "Interest Rate cannot be negative.");
+
+                let waterfallTiers = null;
+                if (raw.waterfallJson.trim() !== '') {
+                    try {
+                        waterfallTiers = JSON.parse(raw.waterfallJson);
+                        check('waterfallJson', !Array.isArray(waterfallTiers), 'Waterfall JSON must be an array of tier objects.');
+                        if(Array.isArray(waterfallTiers)) {
+                            const prefTier = waterfallTiers.find(t => t.type === 'pref');
+                            if (prefTier && typeof prefTier.rate !== 'number') {
+                                 check('waterfallJson', true, 'A "pref" tier must have a numeric "rate" property.');
+                            }
+                        }
+                    } catch(e) {
+                        check('waterfallJson', true, 'Waterfall definition is not valid JSON.');
+                        waterfallTiers = null;
+                    }
+                }
+
+                $('validationSummary').innerHTML = Array.from(errors).map(e => `<div>&bull; ${e}</div>`).join('');
+                if (errors.size > 0) return null;
+
+                const inputs = { ...raw, waterfallTiers };
+                ['closingCosts', 'ltc', 'interestRate', 'financingFees', 'vacancy', 'rentGrowth', 'opexRatio', 'opexGrowth', 'exitCap', 'terminalGrowthRate', 'costOfSale', 'lpShare', 'postRenoRentPremium']
+                    .forEach(key => inputs[key] /= 100);
+                
+                inputs.gpShare = 1 - inputs.lpShare;
+                return inputs;
+            },
+            
+            calculateCapitalStack(inputs) {
+                const renovationBudget = inputs.units * inputs.renovationPerUnit;
+                const closingCostsVal = inputs.purchasePrice * inputs.closingCosts;
+                const baseProjectCost = inputs.purchasePrice + renovationBudget + closingCostsVal;
+                const seniorLoanAmount = baseProjectCost * inputs.ltc;
+                const financingFeesVal = seniorLoanAmount * inputs.financingFees;
+                const totalProjectCost = baseProjectCost + financingFeesVal;
+                const equityRequired = totalProjectCost - seniorLoanAmount;
+                const lpEquity = equityRequired * inputs.lpShare;
+                const gpEquity = equityRequired * inputs.gpShare;
+
+                return { ...inputs, renovationBudget, closingCostsVal, seniorLoanAmount, financingFeesVal, totalProjectCost, equityRequired, lpEquity, gpEquity };
             }
-            return mid; // return best guess
-        }
+        };
 
-
-        // --- MAIN CALCULATION ENGINE ---
         function calculateModel() {
-            // --- 1. GATHER INPUTS ---
-            const purchasePrice = parseFloat($('purchasePrice').value);
-            const closingCostsPct = parseFloat($('closingCosts').value) / 100;
-            const units = parseInt($('units').value);
-            const renoPerUnit = parseFloat($('renovationPerUnit').value);
-            const ltc = parseFloat($('ltc').value) / 100;
-            const interestRate = parseFloat($('interestRate').value) / 100;
-            const amortization = parseInt($('amortization').value);
-            const ioPeriod = parseInt($('ioPeriod').value);
-            const financingFeesPct = parseFloat($('financingFees').value) / 100;
-            const startRent = parseFloat($('startRent').value);
-            const rentGrowth = parseFloat($('rentGrowth').value) / 100;
-            const vacancy = parseFloat($('vacancy').value) / 100;
-            const opexRatio = parseFloat($('opexRatio').value) / 100;
-            const opexGrowth = parseFloat($('opexGrowth').value) / 100;
-            const stabilizedCapex = parseFloat($('stabilizedCapex').value);
-            const holdPeriod = parseInt($('holdPeriod').value);
-            const exitCap = parseFloat($('exitCap').value) / 100;
-            const costOfSalePct = parseFloat($('costOfSale').value) / 100;
-            const lpShare = parseFloat($('lpShare').value) / 100;
-            const gpShare = 1 - lpShare;
-            const prefReturn = parseFloat($('prefReturn').value) / 100;
-            const [gpPromote, lpPromote] = $('promoteSplit').value.split('/').map(s => parseFloat(s.trim()) / 100);
+            const btn = $('calculateBtn'), btnText = $('btnText'), spinner = $('btnSpinner');
+            btn.disabled = true; btnText.classList.add('hidden'); spinner.classList.remove('hidden');
+            ALL_INPUT_IDS.forEach(id => $(id).disabled = true);
 
-            // --- 2. SOURCES & USES ---
-            const closingCosts = purchasePrice * closingCostsPct;
-            const renovationBudget = units * renoPerUnit;
-            const totalUses = purchasePrice + renovationBudget + closingCosts;
-            const loanAmount = totalUses * ltc;
-            const financingFees = loanAmount * financingFeesPct;
-            const totalProjectCost = totalUses + financingFees;
-            const totalEquity = totalProjectCost - loanAmount;
-            const lpEquity = totalEquity * lpShare;
-            const gpEquity = totalEquity * gpShare;
+            setTimeout(() => {
+                try {
+                    const baseInputs = underwritingModel.parseAndValidateInputs();
+                    if (!baseInputs) return;
+                    
+                    const inputs = underwritingModel.calculateCapitalStack(baseInputs);
+                    const { projectIRR, annualData, netSaleProceeds, grossExitValue } = underwritingModel.runSingleScenario(inputs);
+                    
+                    const projectAnnualCFs = annualData.map(d => d.leveredCF);
+                    if (projectAnnualCFs.length > 0) projectAnnualCFs[projectAnnualCFs.length - 1] += netSaleProceeds;
+                    const totalDistributions = projectAnnualCFs.reduce((a, b) => a + b, 0);
+                    const projectMOIC = inputs.equityRequired > 0 ? totalDistributions / inputs.equityRequired : Infinity;
+                    
+                    const { lpAnnualCFs, gpAnnualCFs, tierResults } = underwritingModel.computeParametricWaterfall(inputs, annualData, netSaleProceeds);
+                    
+                    const lpIRR = (inputs.lpEquity > 0 && tierResults) ? calculateIRR([-inputs.lpEquity, ...lpAnnualCFs]) : NaN;
+                    const gpIRR = (inputs.gpEquity > 0 && tierResults) ? calculateIRR([-inputs.gpEquity, ...gpAnnualCFs]) : NaN;
+                    const lpMOIC = (inputs.lpEquity > 0 && tierResults) ? lpAnnualCFs.reduce((a, b) => a + b, 0) / inputs.lpEquity : Infinity;
+                    const gpMOIC = (inputs.gpEquity > 0 && tierResults) ? gpAnnualCFs.reduce((a, b) => a + b, 0) / inputs.gpEquity : Infinity;
 
-            // --- 3. BUILD MONTHLY PRO FORMA ---
-            let monthlyData = [];
-            let currentLoanBalance = loanAmount;
-            const monthlyInterestRate = interestRate / 12;
-            const amortizationMonths = amortization * 12;
-            const pmt = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -amortizationMonths));
-            
-            for (let month = 1; month <= holdPeriod * 12; month++) {
-                const year = Math.ceil(month / 12);
-                const currentMonthRent = startRent * Math.pow(1 + rentGrowth, year - 1);
-                
-                const pgi = units * currentMonthRent;
-                const vacLoss = pgi * vacancy;
-                const egi = pgi - vacLoss;
+                    lastResultsForCSV = { baseInputs, annualData, lpAnnualCFs, gpAnnualCFs, tierResults };
+                    updateUI({ baseInputs, inputs, projectIRR, projectMOIC, grossExitValue, lpIRR, gpIRR, lpMOIC, gpMOIC, annualData, tierResults, lpAnnualCFs, gpAnnualCFs, netSaleProceeds });
+                    runSensitivityAnalysis(inputs);
 
-                const baseOpex = pgi * opexRatio;
-                const totalOpex = (baseOpex / 12) * Math.pow(1 + opexGrowth, year - 1);
-                const noi = egi - totalOpex;
-                const capex = (stabilizedCapex * units / 12);
-                const unleveredCF = noi - capex;
-
-                const interestPayment = currentLoanBalance * monthlyInterestRate;
-                let principalPayment = 0;
-                if (month > ioPeriod) {
-                    principalPayment = pmt - interestPayment;
+                } catch(e) {
+                    console.error("An error occurred during calculation:", e);
+                    $('modelAlerts').innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">Calculation Error</p><p>An unexpected error occurred. Please check your inputs or reset the model.</p></div>`;
+                } finally {
+                   const btn = $('calculateBtn'), btnText = $('btnText'), spinner = $('btnSpinner');
+                   btn.disabled = false; btnText.classList.remove('hidden'); spinner.classList.add('hidden');
+                   ALL_INPUT_IDS.forEach(id => $(id).disabled = false);
                 }
-                const debtService = interestPayment + principalPayment;
-                const leveredCF = unleveredCF - debtService;
-                
-                currentLoanBalance -= principalPayment;
-                monthlyData.push({ year, noi, unleveredCF, leveredCF, currentLoanBalance });
-            }
+            }, 50);
+        }
 
-            // --- 4. SUMMARIZE ANNUALLY & CALCULATE METRICS ---
-            let annualData = [];
-            for (let y = 1; y <= holdPeriod; y++) {
-                const yearData = monthlyData.filter(d => d.year === y);
-                const annualNOI = yearData.reduce((sum, d) => sum + d.noi, 0);
-                const annualLeveredCF = yearData.reduce((sum, d) => sum + d.leveredCF, 0);
-                const eoyLoanBalance = yearData[yearData.length - 1].currentLoanBalance;
-                const ltv = eoyLoanBalance / purchasePrice;
-                const debtYield = annualNOI / eoyLoanBalance;
-                annualData.push({ year: y, noi: annualNOI, leveredCF: annualLeveredCF, debtYield, ltv });
-            }
-
-            // --- 5. EXIT CALCULATION ---
-            const forwardNOI = annualData[holdPeriod - 1].noi * (1 + rentGrowth);
-            const grossExitValue = forwardNOI / exitCap;
-            const costOfSale = grossExitValue * costOfSalePct;
-            const netExitValue = grossExitValue - costOfSale;
-            const loanRepayment = currentLoanBalance;
-            const netSaleProceeds = netExitValue - loanRepayment;
-
-            // --- 6. PROPERTY-LEVEL RETURNS ---
-            const propertyCashFlows = [-totalEquity, ...annualData.map(d => d.leveredCF)];
-            propertyCashFlows[holdPeriod] += netSaleProceeds;
-            const projectIRR = calculateIRR(propertyCashFlows);
-            const projectMOIC = propertyCashFlows.slice(1).reduce((a, b) => a + b, 0) / totalEquity;
-
-            // --- 7. PARTNERSHIP WATERFALL ---
-            let lpPrefAccrued = 0;
-            let lpReturnOfCapital = lpEquity;
-            let gpReturnOfCapital = gpEquity;
-            let lpCF = Array(holdPeriod).fill(0);
-            let gpCF = Array(holdPeriod).fill(0);
-
-            for (let y = 0; y < holdPeriod; y++) {
-                let cfToDistribute = annualData[y].leveredCF;
-                if (y === holdPeriod - 1) cfToDistribute += netSaleProceeds;
-
-                // Accrue pref on contributed capital
-                lpPrefAccrued += (lpEquity - (lpEquity - lpReturnOfCapital)) * prefReturn;
-
-                // Tier 1: Return of Capital (Pro-Rata)
-                let rocToDistribute = Math.min(cfToDistribute, lpReturnOfCapital + gpReturnOfCapital);
-                let lpRocDist = rocToDistribute * (lpReturnOfCapital / (lpReturnOfCapital + gpReturnOfCapital) || 0);
-                let gpRocDist = rocToDistribute * (gpReturnOfCapital / (lpReturnOfCapital + gpReturnOfCapital) || 0);
-                lpReturnOfCapital -= lpRocDist;
-                gpReturnOfCapital -= gpRocDist;
-                lpCF[y] += lpRocDist;
-                gpCF[y] += gpRocDist;
-                cfToDistribute -= rocToDistribute;
-
-                // Tier 2: Preferred Return to LP
-                let prefDist = Math.min(cfToDistribute, lpPrefAccrued);
-                lpCF[y] += prefDist;
-                lpPrefAccrued -= prefDist;
-                cfToDistribute -= prefDist;
-
-                // Tier 3: Promote Split
-                if (cfToDistribute > 0) {
-                    lpCF[y] += cfToDistribute * lpPromote;
-                    gpCF[y] += cfToDistribute * gpPromote;
-                }
-            }
-
-            const lpTotalCF = [-lpEquity, ...lpCF];
-            const lpIRR = calculateIRR(lpTotalCF);
-            const lpMOIC = lpTotalCF.slice(1).reduce((a, b) => a + b, 0) / lpEquity;
+        function updateUI(results) {
+            const { baseInputs, inputs, projectIRR, projectMOIC, grossExitValue, lpIRR, gpIRR, lpMOIC, gpMOIC, annualData, tierResults, lpAnnualCFs, gpAnnualCFs, netSaleProceeds } = results;
             
-            const gpTotalCF = [-gpEquity, ...gpCF];
-            const gpIRR = calculateIRR(gpTotalCF);
-            const gpMOIC = gpTotalCF.slice(1).reduce((a, b) => a + b, 0) / gpEquity;
+            const hasWaterfall = tierResults !== null;
+            $('partnershipReturns').classList.toggle('disabled-section', !hasWaterfall);
+            $('waterfallDistribution').classList.toggle('disabled-section', !hasWaterfall);
 
-            // --- 8. UI UPDATES ---
-            // Executive Summary
+            $('summaryNarrative').textContent = `This ${baseInputs.holdPeriod}-year investment in a ${baseInputs.units}-unit ${baseInputs.propertyType} asset is projected to generate a ${formatPercent(projectIRR)} IRR and a ${formatMulti(projectMOIC)} equity multiple. The strategy involves acquiring the property for ${formatMillions(inputs.purchasePrice)} and investing ${formatMillions(inputs.renovationBudget)} in a value-add strategy targeting a ${formatPercent(inputs.postRenoRentPremium,0)} rent premium. The project is capitalized with ${formatMillions(inputs.seniorLoanAmount)} in senior debt (${formatPercent(inputs.ltc,0)} LTC) and requires ${formatMillions(inputs.equityRequired)} of equity. At exit, the property is projected to sell for ${formatMillions(grossExitValue)}, based on a ${formatPercent(inputs.exitCap, 2)} forward cap rate.`;
             $('summaryIRR').textContent = formatPercent(projectIRR);
             $('summaryMOIC').textContent = formatMulti(projectMOIC);
-            $('summaryEquity').textContent = formatMillions(totalEquity);
+            $('summaryEquity').textContent = formatMillions(inputs.equityRequired);
             $('summaryExit').textContent = formatMillions(grossExitValue);
-            $('summaryNarrative').textContent = `This ${holdPeriod}-year investment in a ${units}-unit multifamily asset is projected to generate a ${formatPercent(projectIRR)} IRR and a ${formatMulti(projectMOIC)} equity multiple. The strategy involves acquiring the property for ${formatMillions(purchasePrice)} and investing ${formatMillions(renovationBudget)} in value-add renovations. The project is capitalized with ${formatMillions(loanAmount)} in senior debt and requires ${formatMillions(totalEquity)} of equity. At exit, the property is projected to sell for ${formatMillions(grossExitValue)}, based on a ${formatPercent(exitCap)} forward cap rate.`;
-
-            // Returns Summary
             $('lpIRR').textContent = formatPercent(lpIRR);
             $('gpIRR').textContent = formatPercent(gpIRR);
             $('lpMOIC').textContent = formatMulti(lpMOIC);
             $('gpMOIC').textContent = formatMulti(gpMOIC);
 
-            // Capital Stack
-            $('sourceDebt').textContent = formatMillions(loanAmount);
-            $('sourceGPEquity').textContent = formatMillions(gpEquity);
-            $('sourceLPEquity').textContent = formatMillions(lpEquity);
-            $('sourceTotal').textContent = formatMillions(totalProjectCost);
-            $('usePrice').textContent = formatMillions(purchasePrice);
-            $('useReno').textContent = formatMillions(renovationBudget);
-            $('useClosing').textContent = formatMillions(closingCosts);
-            $('useFinancing').textContent = formatMillions(financingFees);
-            $('useTotal').textContent = formatMillions(totalProjectCost);
+            const totalSources = inputs.totalProjectCost;
+            $('sourceDebt').textContent=formatMillions(inputs.seniorLoanAmount); $('sourceDebtPct').textContent=formatPercent(inputs.seniorLoanAmount/totalSources);
+            $('sourceGPEquity').textContent=formatMillions(inputs.gpEquity); $('sourceGPEquityPct').textContent=formatPercent(inputs.gpEquity/totalSources);
+            $('sourceLPEquity').textContent=formatMillions(inputs.lpEquity); $('sourceLPEquityPct').textContent=formatPercent(inputs.lpEquity/totalSources);
+            $('sourceTotal').textContent=formatMillions(totalSources);
+            $('usePrice').textContent=formatMillions(inputs.purchasePrice); 
+            $('useReno').textContent=formatMillions(inputs.renovationBudget); 
+            $('useClosing').textContent=formatMillions(inputs.closingCostsVal); 
+            $('useFinancing').textContent=formatMillions(inputs.financingFeesVal);
+            $('useTotal').textContent=formatMillions(totalSources);
 
-            // Pro Forma Table
-            const proFormaRows = [
-                { label: 'NOI', data: annualData.map(d => formatCurrency(d.noi)) },
-                { label: 'Levered CF', data: annualData.map(d => formatCurrency(d.leveredCF)) },
-                { label: 'Debt Yield', data: annualData.map(d => formatPercent(d.debtYield)) },
-                { label: 'LTV', data: annualData.map(d => formatPercent(d.ltv)) }
+            const proFormaHeader = $('proFormaHeader');
+            proFormaHeader.innerHTML = `<th class="py-2 px-2 text-left font-semibold">Metric</th>`;
+            for(let y=1; y<=baseInputs.holdPeriod; y++) proFormaHeader.innerHTML += `<th class="py-2 px-2 text-right font-semibold">Yr ${y}</th>`;
+            
+            let proFormaRows = [ 
+                { label: 'Potential Gross Income', data: annualData.map(d => d.pgi) },
+                { label: 'Effective Gross Income', data: annualData.map(d => d.egi) },
+                { label: 'Operating Expenses', data: annualData.map(d => d.opex) },
+                { label: 'NOI', data: annualData.map(d => d.noi), bold: true },
+                { label: 'CapEx Reserves', data: annualData.map(d => d.capex) },
+                { label: 'Debt Service', data: annualData.map(d => d.debtService) },
+                { label: 'Levered CF', data: annualData.map(d => d.leveredCF), bold: true },
+                { label: 'DSCR', data: annualData.map(d => d.dscr), format: (v) => v.toFixed(2) + 'x' },
             ];
-            $('proFormaTable').innerHTML = proFormaRows.map(row => `<tr>
-                <td class="py-2 px-2 font-semibold text-gray-700">${row.label}</td>
-                ${row.data.map(d => `<td class="py-2 px-2 text-right font-mono text-gray-800">${d}</td>`).join('')}
-            </tr>`).join('');
 
-            // Waterfall Chart
-            const profitToLP = lpTotalCF.slice(1).reduce((a, b) => a + b, 0) - lpEquity;
-            const profitToGP = gpTotalCF.slice(1).reduce((a, b) => a + b, 0) - gpEquity;
-            const ctx = $('waterfallChart').getContext('2d');
-            if (waterfallChart) waterfallChart.destroy();
-            waterfallChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['LP (Investors) Profit', 'GP (Sponsor) Profit'],
-                    datasets: [{
-                        label: 'Profit Distribution',
-                        data: [profitToLP, profitToGP],
-                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)'],
-                        borderColor: ['#3B82F6', '#10B981'],
-                        borderWidth: 2,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => formatCurrency(ctx.raw) } } },
-                    scales: { x: { ticks: { callback: (val) => formatCurrency(val) } } }
-                }
+            if (hasWaterfall) {
+                proFormaRows.splice(7, 0, { label: null, data: [] }); // Separator
+                proFormaRows.splice(8, 0, { label: 'Distribution to LP', data: lpAnnualCFs });
+                proFormaRows.splice(9, 0, { label: 'Distribution to GP', data: gpAnnualCFs });
+                proFormaRows.splice(10, 0, { label: null, data: [] }); // Separator
+            }
+
+            $('proFormaTable').innerHTML = proFormaRows.map(row => {
+                if (!row.label) return `<tr><td colspan="${baseInputs.holdPeriod + 1}"><hr class="my-1 border-gray-300"></td></tr>`;
+                const labelClass = row.bold ? 'font-bold' : 'font-semibold text-gray-700';
+                const dataClass = row.bold ? 'font-bold' : 'font-mono text-gray-800';
+                const formatFn = row.format || ((v) => formatCurrency(v));
+                return `<tr><td class="py-1 px-2 ${labelClass} text-left">${row.label}</td>${row.data.map(d => `<td class="py-1 px-2 ${dataClass} text-right">${formatFn(d)}</td>`).join('')}</tr>`
+            }).join('');
+            
+            if(hasWaterfall) {
+                const totalLPDist = lpAnnualCFs.reduce((s, v) => s + v, 0);
+                const totalGPDist = gpAnnualCFs.reduce((s, v) => s + v, 0);
+                const lpProfit = totalLPDist - inputs.lpEquity;
+                const gpProfit = totalGPDist - inputs.gpEquity;
+                const totalProfit = lpProfit + gpProfit;
+                $('lpProfit').textContent = formatMillions(lpProfit);
+                $('gpProfit').textContent = formatMillions(gpProfit);
+                $('totalProfit').textContent = formatMillions(totalProfit);
+                $('lpProfitShare').textContent = formatPercent(totalProfit > 0 ? lpProfit / totalProfit : 0);
+                $('gpProfitShare').textContent = formatPercent(totalProfit > 0 ? gpProfit / totalProfit : 0);
+                
+                const chartColors = ['#93c5fd', '#60a5fa', '#3b82f6', '#1d4ed8', '#1e40af', '#172554'];
+                const ctx = $('waterfallChart').getContext('2d');
+                if (waterfallChart) waterfallChart.destroy();
+                waterfallChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [`LP (${formatPercent(inputs.lpShare, 0)})`, `GP (${formatPercent(inputs.gpShare, 0)})`],
+                        datasets: tierResults.map((tier, i) => ({
+                            label: tier.name,
+                            data: [tier.lp, tier.gp],
+                            backgroundColor: chartColors[i % chartColors.length]
+                        }))
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, ticks: { callback: (val) => formatCurrency(val) } } } }
+                });
+            }
+
+            const propertyType = inputs.propertyType || 'Multifamily';
+            $('benchmarkNote').textContent = `Note: Typical institutional ${propertyType.toLowerCase()} IRR targets range from ${BENCHMARKS[propertyType] || '12-18%'} (Source: 2025 Market Reports). Always compare projections against current market benchmarks.`;
+            
+            const alerts = new Set();
+            annualData.forEach(year => { 
+                if(year.dscr < 1.25) alerts.add(`<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert"><p class="font-bold">DSCR Warning</p><p>Debt Service Coverage Ratio in Year ${year.year} is ${year.dscr.toFixed(2)}x, which is below the typical lender covenant of 1.25x.</p></div>`); 
+                if (year.leveredCF < 0) alerts.add(`<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert"><p class="font-bold">Negative Cash Flow</p><p>Negative levered cash flow in Year ${year.year} resulted in zero distributions for that period.</p></div>`);
             });
+            if (netSaleProceeds < 0) alerts.add(`<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">Underwater Exit</p><p>The projected net sale proceeds are negative. The waterfall assumes no distributions from the sale.</p></div>`)
+            if(!hasWaterfall && $('waterfallJson').value.trim() !== '') {
+                 alerts.add(`<div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-lg" role="alert"><p class="font-bold">Invalid Waterfall</p><p>The waterfall JSON is invalid. Partnership returns have not been calculated.</p></div>`);
+            }
+             $('modelAlerts').innerHTML = Array.from(alerts).join('');
+        }
+
+        function runSensitivityAnalysis(baseInputs) {
+            const capRateSteps = [-0.005, -0.0025, 0, 0.0025, 0.005];
+            const holdPeriodSteps = [-2, -1, 0, 1, 2];
+            const results = holdPeriodSteps.map(hp_mod => {
+                const newHold = baseInputs.holdPeriod + hp_mod;
+                if (newHold < 1) return Array(capRateSteps.length).fill(NaN);
+                return capRateSteps.map(cr_mod => {
+                    const tempExitCap = baseInputs.exitCap + cr_mod;
+                    if (tempExitCap <= 0) return NaN;
+                    const scenarioInputs = underwritingModel.calculateCapitalStack({ ...baseInputs, holdPeriod: newHold, exitCap: tempExitCap });
+                    const { projectIRR } = underwritingModel.runSingleScenario(scenarioInputs);
+                    return projectIRR;
+                });
+            });
+            
+            const sensContainer = $('sensitivityTableContainer');
+            let tableHTML = '<table class="w-full text-center border-collapse"><thead><tr><th class="border p-2 bg-gray-50">Hold Period</th>';
+            capRateSteps.forEach(cr_mod => tableHTML += `<th class="border p-2 bg-gray-50">${formatPercent(baseInputs.exitCap + cr_mod, 2)}</th>`);
+            tableHTML += '</tr></thead><tbody>';
+            results.forEach((row, i) => {
+                tableHTML += `<tr><td class="border p-2 font-bold bg-gray-50">${baseInputs.holdPeriod + holdPeriodSteps[i]} Years</td>`;
+                row.forEach(cell => {
+                    const displayVal = formatPercent(cell);
+                    let color = 'bg-gray-100 text-gray-800';
+                    if (displayVal !== "N/A") {
+                        color = cell > 0.20 ? 'bg-green-200 text-green-900' : cell > 0.12 ? 'bg-yellow-100 text-yellow-900' : 'bg-red-100 text-red-900';
+                    }
+                    tableHTML += `<td class="border p-2 font-mono ${color}">${displayVal}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+            sensContainer.innerHTML = tableHTML;
         }
         
-        // --- EVENT LISTENERS ---
-        $('calculateBtn').addEventListener('click', calculateModel);
-        window.addEventListener('load', calculateModel);
+        function exportToCSV() {
+            if (!lastResultsForCSV) {
+                alert("Please run a calculation first.");
+                return;
+            }
+            const { baseInputs, annualData, lpAnnualCFs, gpAnnualCFs, tierResults } = lastResultsForCSV;
+            
+            const headers = ['Metric', ...Array.from({length: baseInputs.holdPeriod}, (_,i) => `Year ${i+1}`)];
+            let rows = [
+                { label: 'Potential Gross Income', data: annualData.map(d => d.pgi), format: (v) => v.toFixed(2) },
+                { label: 'Effective Gross Income', data: annualData.map(d => d.egi), format: (v) => v.toFixed(2) },
+                { label: 'Operating Expenses', data: annualData.map(d => d.opex), format: (v) => v.toFixed(2) },
+                { label: 'NOI', data: annualData.map(d => d.noi), format: (v) => v.toFixed(2)},
+                { label: 'CapEx Reserves', data: annualData.map(d => d.capex), format: (v) => v.toFixed(2) },
+                { label: 'Debt Service', data: annualData.map(d => d.debtService), format: (v) => v.toFixed(2) },
+                { label: 'Levered CF', data: annualData.map(d => d.leveredCF), format: (v) => v.toFixed(2)},
+                { label: 'DSCR', data: annualData.map(d => d.dscr), format: (v) => `${v.toFixed(4)}x` },
+            ];
+
+            if(tierResults) {
+                 rows.push({ label: 'Distribution to LP', data: lpAnnualCFs, format: (v) => v.toFixed(2) });
+                 rows.push({ label: 'Distribution to GP', data: gpAnnualCFs, format: (v) => v.toFixed(2) });
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" 
+                + rows.map(r => {
+                    const formatFn = r.format || ((v) => v.toFixed(2));
+                    return `"${r.label}",${r.data.map(formatFn).join(",")}`
+                }).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            // ENHANCEMENT: Sanitize filename for special characters.
+            const sanitizedFilename = baseInputs.propertyName.replace(/[^a-zA-Z0-9]/g, '_');
+            link.setAttribute("download", `${sanitizedFilename}_pro_forma.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function applyPreset(preset) {
+            // ENHANCEMENT: Add confirmation before overwriting custom changes.
+            if ($('dealPreset').value === 'custom' || preset === 'custom') {
+                 // Do nothing if switching to/from custom
+            } else if (confirm("This will overwrite your current inputs with the selected preset. Are you sure?")) {
+                 // Proceed if confirmed
+            } else {
+                $('dealPreset').value = 'custom'; // Revert dropdown if cancelled
+                return;
+            }
+            
+             const presets = {
+                valueAdd: { renovationPerUnit: "15000", renoCompletionMonths: "12", postRenoRentPremium: "15", interestRate: "4.5", exitCap: "4.75", terminalGrowthRate: "3.0" },
+                corePlus: { renovationPerUnit: "5000", renoCompletionMonths: "6", postRenoRentPremium: "5", interestRate: "4.0", exitCap: "4.5", terminalGrowthRate: "2.5" },
+                core: { renovationPerUnit: "0", renoCompletionMonths: "0", postRenoRentPremium: "0", interestRate: "3.8", exitCap: "4.25", terminalGrowthRate: "2.0" }
+            };
+            if (!presets[preset]) return;
+            
+            const presetValues = presets[preset];
+            for (const id in presetValues) {
+                $(id).value = presetValues[id];
+            }
+            const defaultValues = { propertyName: "The Landmark", propertyType: "Multifamily", purchasePrice: "50000000", closingCosts: "2.5", units: "250", ltc: "65", amortization: "30", ioPeriod: "24", financingFees: "1.0", startRent: "1500", vacancy: "5.0", rentGrowth: "3.0", opexRatio: "40", opexGrowth: "2.5", stabilizedCapex: "250", holdPeriod: "5", costOfSale: "1.5", lpShare: "90" };
+            for (const id in defaultValues) {
+                if(!presetValues[id]) $(id).value = defaultValues[id];
+            }
+            $('dealPreset').value = preset;
+            calculateModel();
+        }
+
+        function setupEventListeners() {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = { 'tab-dashboard': $('output-dashboard'), 'tab-proforma': $('output-proforma'), 'tab-sensitivity': $('output-sensitivity') };
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    Object.values(contents).forEach(c => c.classList.add('hidden'));
+                    contents[tab.id].classList.remove('hidden');
+                });
+            });
+
+            $('calculateBtn').addEventListener('click', calculateModel);
+            $('restoreDefaultWaterfall').addEventListener('click', () => {
+                $('waterfallJson').value = DEFAULT_WATERFALL_JSON;
+            });
+             $('csvBtn').addEventListener('click', exportToCSV);
+             $('dealPreset').addEventListener('change', (e) => applyPreset(e.target.value));
+             // Make inputs revert preset to "custom" on change
+             ALL_INPUT_IDS.forEach(id => {
+                if (id !== 'dealPreset') {
+                    $(id).addEventListener('input', () => $('dealPreset').value = 'custom');
+                }
+             });
+
+            $('resetBtn').addEventListener('click', () => {
+                const defaultValues = { propertyName: "The Landmark", propertyType: "Multifamily", purchasePrice: "50000000", closingCosts: "2.5", units: "250", renovationPerUnit: "15000", renoCompletionMonths: "12", postRenoRentPremium: "15", ltc: "65", interestRate: "4.5", amortization: "30", ioPeriod: "24", financingFees: "1.0", startRent: "1500", vacancy: "5.0", rentGrowth: "3.0", opexRatio: "40", opexGrowth: "2.5", stabilizedCapex: "250", holdPeriod: "5", exitCap: "4.75", terminalGrowthRate: "3.0", costOfSale: "1.5", lpShare: "90", dealPreset: "valueAdd" };
+                ALL_INPUT_IDS.forEach(id => {
+                    const el = $(id);
+                    if (id === 'waterfallJson') {
+                        el.value = DEFAULT_WATERFALL_JSON;
+                    } else if (el.tagName === 'SELECT') {
+                         el.value = defaultValues[id];
+                    } else {
+                        el.value = defaultValues[id] !== undefined ? defaultValues[id] : '';
+                    }
+                    el.classList.remove('validation-error');
+                });
+                $('validationSummary').innerHTML = '';
+                $('modelAlerts').innerHTML = '';
+                calculateModel();
+            });
+
+            window.addEventListener('load', () => {
+                 $('waterfallJson').value = DEFAULT_WATERFALL_JSON;
+                 applyPreset('valueAdd');
+                 $('dealPreset').value = "valueAdd";
+            });
+        }
+        setupEventListeners();
     </script>
 </body>
 </html>
+
+
